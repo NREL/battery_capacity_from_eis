@@ -1,10 +1,10 @@
 # Predicting battery capacity from impedance at varying temperature and state-of-charge using machine-learning
 
-Paul Gasper^1,*^, Andrew Schiek^1^, Kandler Smith ^1^, Yuta Shimonishi^2^, Shuhei Yoshida^2^
+Paul Gasper<sup>1,*</sup>, Andrew Schiek<sup>1</sup>, Kandler Smith<sup>1</sup>, Yuta Shimonishi<sup>2</sup>, Shuhei Yoshida<sup>2</sup>
 
-^1^ National Renewable Energy Laboratory, Golden, CO, USA
-^2^ DENSO CORPORATION, Kariya, Aichi, Japan
-^*^ Corresponding author: Paul.Gasper@nrel.gov, pauljgasper@gmail.com
+<sup>1</sup> National Renewable Energy Laboratory, Golden, CO, USA
+<sup>2</sup> DENSO CORPORATION, Kariya, Aichi, Japan
+<sup>*</sup> Corresponding author: Paul.Gasper@nrel.gov, pauljgasper@gmail.com
 
 This repository provides the data and code used in the work "Predicting battery capacity from impedance at varying temperature and state-of-charge using machine-learning". This work uses machine-learning to develop models predicting battery capacity from impedance recorded at varying temperature and state-of-charge from 32 large-format NMC/Gr Li-ion batteries throughout the course of a 500-day aging study. The data set is comprised of a total of 727 electrochemical impedance spectroscopy (EIS) measurements, 622 DC internal resistance measurements, and 1216 capacity measurements. 
 
