@@ -1,0 +1,4 @@
+Zhang, Yunwei, Tang, Qiaochu, Zhang, Yao, Wang, Jiabin, Stimming, Ulrich, & Lee, Alpha A. (2020). Identifying degradation patterns of lithium ion batteries from impedance spectroscopy using machine learning [Data set]. Zenodo. http://doi.org/10.5281/zenodo.3633835
+https://github.com/YunweiZhang/ML-identify-battery-degradation
+
+https://www.nature.com/articles/s41467-020-15235-7.pdf
