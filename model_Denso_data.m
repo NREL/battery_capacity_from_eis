@@ -16,56 +16,49 @@ trains several of the more interesting models, and visualizes some of the
 results.
 %}
 
-% Filter out poorly interpolated data
+
 %{
-Match up seriesIdx for cells b/w the two data sets.
-Split data set into 25C,50SOC and -10C,50SOC sets for training separate
-models.
+Data tables in 'data\Data_Denso2021.mat':
+    Data: Data from EIS conducted during aging study
+    DataFormatted: Same as Data, with impedance values at each frequency
+        separated into individual columns
+    Data2: Data from EIS conducted before and after the aging study, 
+        varying EIS temperature and EIS SOC.
+    Data2Formatted: Same as Data2, with impedance values at each frequency
+        separated into individual columns
 %}
 % Load the data tables
-load('data\Data_Denso2021.mat', 'Data', 'DataFormatted', 'Data2Formatted')
-% Filter out noisy interpolated data
-idxKeep = filterInterpData(Data);
-%{
-% Show that the filter is working
-figure; plot(Data.Zreal(idxKeep,15:end), Data.Zimag(idxKeep,15:end), '.')
-hold on; plot(Data.Zreal(~idxKeep,15:end), Data.Zimag(~idxKeep,15:end), 'k.')
-% The filter removes a few measurements that might be okay, but all of the
-% measurements that were clearly interpolated with error have been
-% correctly removed from the data set.
-%}
-DataFormatted = DataFormatted(idxKeep, :);
-DataAll = combineDataTables(DataFormatted, Data2Formatted);
+load('data\Data_Denso2021.mat', 'DataFormatted', 'Data2Formatted')
+Data = combineDataTables(DataFormatted, Data2Formatted);
 
 % Load equivalent circuit model fit parameters as a separate table
-DataECM = importfile("python/DensoData_EIS_paramters.csv");
-DataECM = DataECM(idxKeep, :);
-DataECM2 = importfile("python/DensoData_EIS_vSOCvT_paramters.csv");
+DataECM = importfile("python/DensoData_EIS_parameters.csv");
+DataECM2 = importfile("python/DensoData_EIS_vSOCvT_parameters.csv");
 % Add other variables to the ECM tables
-DataECM = [DataFormatted(:,1:25), DataECM];
+DataECM = [DataFormatted(:,1:24), DataECM];
 DataECM2 = [Data2Formatted(:,1:5), DataECM2];
 % Combine ECM tables
-DataAllECM = combineDataTables(DataECM, DataECM2);
-% RC1 and RC2 order is not always right (RC1 should be at higher frequency than RC2):
-DataAllECM = fixRCpairs(DataAllECM);
+DataECM = combineDataTables(DataECM, DataECM2);
+% RC1 and RC2 order is not always right (RC1 should be at higher 
+% characteristic frequency than RC2 for consistency):
+DataECM = fixRCpairs(DataECM);
 
-% Split into 25C and -10C, 50% SOC data sets for the initial modeling study
-% -10C
-mask_m10C = DataAll.TdegC_EIS == -10 & DataAll.soc_EIS == 0.5;
-Data_m10C = DataAll(mask_m10C, :); DataECM_m10C = DataAllECM(mask_m10C, :);
-% Remove BOL cell data (seriesIdx = 44, much different from aged cells)
-Data_m10C = Data_m10C(1:end-1, :); DataECM_m10C = DataECM_m10C(1:end-1, :);
-% 25C
-mask_25C = DataAll.TdegC_EIS == 25 & DataAll.soc_EIS == 0.5;
-Data_25C = DataAll(mask_25C, :); DataECM_25C = DataAllECM(mask_25C, :);
-% Remove BOL cell data (seriesIdx = 43 & 44, much different from aged cells)
-Data_25C = Data_25C(1:end-2, :); DataECM_25C = DataECM_25C(1:end-2, :);
+% % % Split into 25C and -10C, 50% SOC data sets for the initial modeling study
+% % % -10C
+% % mask_m10C = DataAll.TdegC_EIS == -10 & DataAll.soc_EIS == 0.5;
+% % Data_m10C = DataAll(mask_m10C, :); DataECM_m10C = DataAllECM(mask_m10C, :);
+% % % Remove BOL cell data (seriesIdx = 44, much different from aged cells)
+% % Data_m10C = Data_m10C(1:end-1, :); DataECM_m10C = DataECM_m10C(1:end-1, :);
+% % % 25C
+% % mask_25C = DataAll.TdegC_EIS == 25 & DataAll.soc_EIS == 0.5;
+% % Data_25C = DataAll(mask_25C, :); DataECM_25C = DataAllECM(mask_25C, :);
+% % % Remove BOL cell data (seriesIdx = 43 & 44, much different from aged cells)
+% % Data_25C = Data_25C(1:end-2, :); DataECM_25C = DataECM_25C(1:end-2, :);
 
 % Clean up
-clearvars Data DataFormatted Data2Formatted idxKeep DataECM DataECM2 mask_m10C mask_25C
+clearvars DataFormatted Data2Formatted DataECM2
 
-%% -10C Data modeling
-Data = Data_m10C; DataECM = DataECM_m10C;
+%% Modeling
 % Pull out X and Y data tables. X variables are any Zreal, Zimag, Zmag, and
 % Zphz data points. Y variable is the relative discharge capacity, q.
 X = Data(:, 6:end); Y = Data(:,2); seriesIdx = Data{:, 1};
@@ -84,51 +77,24 @@ seriesIdxCV = seriesIdx(~maskTest);
 % Define a cross-validation scheme.
 cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% DEFINE ESTIMATOR
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Model training is done using RegressionPipeline objects. We will use one
-% of several estimators: linear model, gaussian process model, and random
-% forest model (in MATLAB, called a bagged tree ensemble).
-estimator = @fitlm;
-% estimator = @fitrgp;
-% estimator = @fitrensemble;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Define the pipelines
-TdegC = -10;
-Pipes_m10C = defineModelPipelines(estimator, TdegC);
-
+% Linear estimator pipelines
+Pipes_Linear = defineModelPipelines(@fitlm);
 % Compare each of these models using the train/CV and test sets
 warning('off')
-Pipes_m10C = fitPipes(Pipes_m10C, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
+Pipes_Linear = fitPipes(Pipes_Linear, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
+save('results/pipes_linear.mat', Pipes_Linear)
 
-%% 25C Data modeling
-Data = Data_25C; DataECM = DataECM_25C;
-% Pull out X and Y data tables. X variables are any Zreal, Zimag, Zmag, and
-% Zphz data points. Y variable is the relative discharge capacity, q.
-X = Data(:, 6:end); Y = Data(:,2); seriesIdx = Data{:, 1};
-X_ECM = DataECM(:, 6:end); Y_ECM = DataECM(:,2);
-% Data from cells running a WLTP drive cycle, and some from the aging study
-% are used as test data.
-cellsTest = [7,10,13,17,24,30,31];
-maskTest = any(Data.seriesIdx == cellsTest,2);
-data.Xtest = X(maskTest,:); data.Ytest = Y(maskTest,:); 
-dataECM.Xtest = X_ECM(maskTest,:); dataECM.Ytest = Y_ECM(maskTest,:);
-seriesIdxTest = seriesIdx(maskTest);
-% Cross-validation and training are conducted on the same data split.
-data.Xcv = X(~maskTest,:); data.Ycv = Y(~maskTest,:); 
-dataECM.Xcv = X_ECM(~maskTest,:); dataECM.Ycv = Y(~maskTest,:);
-seriesIdxCV = seriesIdx(~maskTest);
-% Define a cross-validation scheme.
-cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
-
-% Define the pipelines
-TdegC = 25;
-Pipes_25C = defineModelPipelines(estimator, TdegC);
-
+% Gaussian process models
+Pipes_GPR = defineModelPipelines(@fitrgp);
 % Compare each of these models using the train/CV and test sets
 warning('off')
-Pipes_25C = fitPipes(Pipes_25C, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
+Pipes_GPR = fitPipes(Pipes_GPR, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
+
+% Random forest models
+Pipes_RF = defineModelPipelines(@fitrensemble);
+% Compare each of these models using the train/CV and test sets
+warning('off')
+Pipes_RF = fitPipes(Pipes_RF, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
 
 %% DCIR models
 % Predict capacity using DC resistance metrics rather than AC impedance.
@@ -230,94 +196,8 @@ Pipes_DCIR(4).maeTrain = PredTrain.FitStats.mae;
 Pipes_DCIR(4).maeCrossVal = PredCV.FitStats.mae;
 Pipes_DCIR(4).maeTest = PredTest.FitStats.mae;
 
-%% Predict capacity using impedance from all temps, socs
-% See if we can predict capacity accurately using impedance from a range of
-% temperatures and SOCs.
-% Load the data tables
-load('data\Data_Denso2021.mat', 'Data', 'DataFormatted', 'Data2Formatted')
-idxKeep = filterInterpData(Data);
-DataFormatted = DataFormatted(idxKeep, :);
-Data = combineDataTables(DataFormatted, Data2Formatted);
-% Remove BOL data (seriesIdx = 43 & 44, the magnitude of the impedance is
-% quite a bit different for these cells compared to the aging test matrix cells).
-Data = Data(1:1194, :);
-clearvars -except Data Pipes_m10C Pipes_25C Pipes_DCIR
-
-% Grab X and Y data. Same train/cv/test splits as above.
-X = Data(:, 6:end); Y = Data(:,2); seriesIdx = Data{:, 1};
-cellsTest = [7,10,13,17,24,30,31];
-maskTest = any(Data.seriesIdx == cellsTest,2);
-data.Xtest = X(maskTest,:);  data.Ytest = Y(maskTest,:);  seriesIdxTest = seriesIdx(maskTest);
-data.Xcv   = X(~maskTest,:); data.Ycv   = Y(~maskTest,:); seriesIdxCV   = seriesIdx(~maskTest);
-cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
-
-% GPR and RandomForest models using 1) double frequency search, 2) SISSO, and 3) UMAP
-%GPR
-estimator = @fitrgp;
-Pipes_GPR = defineModelPipelines2(estimator); warning('off')
-Pipes_GPR = fitPipes(Pipes_GPR, data, [], cvsplit, seriesIdxCV, seriesIdxTest);
-%RandomForest
-estimator = @fitrensemble;
-Pipes_RF = defineModelPipelines2(estimator); warning('off')
-Pipes_RF = fitPipes(Pipes_RF, data, [], cvsplit, seriesIdxCV, seriesIdxTest);
-
-%% Same as above, but use class weights to help handle imbalanced data
-% Regression weights only work for linear or RF models. Use RF since it
-% performs better than linear. GPR models do not allow weights, in MATLAB
-% at least.
-
-% Load the data tables
-load('data\Data_Denso2021.mat', 'Data', 'DataFormatted', 'Data2Formatted')
-idxKeep = filterInterpData(Data);
-DataFormatted = DataFormatted(idxKeep, :);
-Data = combineDataTables(DataFormatted, Data2Formatted);
-% Remove BOL data (seriesIdx = 43 & 44, the magnitude of the impedance is
-% quite a bit different for these cells compared to the aging test matrix cells).
-Data = Data(1:1194, :);
-
-% Grab X and Y data. Same train/cv/test splits as above.
-X = Data(:, 6:end); Y = Data(:,2); seriesIdx = Data{:, 1};
-cellsTest = [7,10,13,17,24,30,31];
-maskTest = any(Data.seriesIdx == cellsTest,2);
-data.Xtest = X(maskTest,:);  data.Ytest = Y(maskTest,:);  seriesIdxTest = seriesIdx(maskTest);
-data.Xcv   = X(~maskTest,:); data.Ycv   = Y(~maskTest,:); seriesIdxCV   = seriesIdx(~maskTest);
-cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
-
-% Calculate weights
-weights = evenlyWeightDataSeries(Data.TdegC_EIS(~maskTest));
-
-% RandomForest, double frequency search, weighted regression
-estimator = @fitrensemble;
-Pipes_RF_2 = defineModelPipelines3(estimator, weights); warning('off')
-Pipes_RF_2 = fitPipes(Pipes_RF_2, data, [], cvsplit, seriesIdxCV, seriesIdxTest);
-
 %% Helper methods
-function idxKeep = filterInterpData(Data)
-% If the value of Zmag at 100 Hz for the interpolated data is not within
-% the range of Zmag at 10 Hz for all of the raw data for that
-% temperature/cell, then get rid of that row.
-idxKeep = true(height(Data), 1);
-idxFreq = 36;
-mask_m10C = Data.TdegC_EIS == -10;
-mask_25C = Data.TdegC_EIS == 25;
-uniqueSeries = unique(Data.seriesIdx, 'stable');
-for thisSeries = uniqueSeries'
-    maskSeries = Data.seriesIdx == thisSeries;
-    % -10C
-    maskSeries_m10C = maskSeries & mask_m10C;
-    Zmag = Data.Zmag(maskSeries_m10C, idxFreq);
-    idxKeep(maskSeries_m10C) = Zmag >= min(Zmag(~Data.isInterpEIS(maskSeries_m10C))) & Zmag <= max(Zmag(~Data.isInterpEIS(maskSeries_m10C)));
-    % 25C
-    maskSeries_25C = maskSeries & mask_25C;
-    Zmag = Data.Zmag(maskSeries_25C, idxFreq);
-    idxKeep(maskSeries_25C) = Zmag >= min(Zmag(~Data.isInterpEIS(maskSeries_25C))) & Zmag <= max(Zmag(~Data.isInterpEIS(maskSeries_25C)));
-end
-end
-
 function Data = combineDataTables(DataFormatted, Data2Formatted)
-% Need to add an isInterpEIS column to Data2Formatted to combine them.
-Data2Formatted.isInterpEIS = zeros(height(Data2Formatted),1);
-Data2Formatted = movevars(Data2Formatted, 'isInterpEIS', 'After', 'q');
 % Make seriesIdx consistent for cells that have repeat data in DataFormatted 
 % and Data2Formatted
 Data2Formatted.seriesIdx(Data2Formatted.seriesIdx == 32) = 1;
@@ -336,7 +216,7 @@ Data = [DataFormatted(:, [1, 17, 23:width(DataFormatted)]); Data2Formatted(:, [1
 Data = sortrows(Data, {'seriesIdx', 'TdegC_EIS', 'soc_EIS'});
 end
 
-function Models = defineModelPipelines(estimator, TdegC)
+function Models = defineModelPipelines(estimator)
 % Model 0: Dummy regressor
 Model_0 = RegressionPipeline(@fitrdummy);
 
@@ -419,15 +299,8 @@ minDist = [0.01;0.03;0.06;0.1;0.3];
 Models_3B = defineUmapModels(estimator, n, nNeighbors, minDist, "Models_3B");
 
 % Model 4: Extract graphical features, no feature selection
-if TdegC == -10
-    seq = {@generateFeaturesGraphicalM10C,...
-        @RegressionPipeline.normalizeZScore};
-elseif TdegC == 25
-    seq = {@generateFeaturesGraphical25C,...
-        @RegressionPipeline.normalizeZScore};
-else
-    error('Help!')
-end
+seq = {@generateFeaturesGraphical,...
+    @RegressionPipeline.normalizeZScore};
 Model_4 = RegressionPipeline(estimator,...
     "FeatureTransformationSequence", seq);
 if strcmp(func2str(estimator), 'fitrensemble')
