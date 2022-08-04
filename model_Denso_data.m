@@ -61,8 +61,8 @@ clearvars DataFormatted Data2Formatted DataECM2
 %% Modeling
 % Pull out X and Y data tables. X variables are any Zreal, Zimag, Zmag, and
 % Zphz data points. Y variable is the relative discharge capacity, q.
-X = Data(:, 6:end); Y = Data(:,2); seriesIdx = Data{:, 1};
-X_ECM = DataECM(:, 6:end); Y_ECM = DataECM(:,2);
+X = Data(:, 5:end); Y = Data(:,2); seriesIdx = Data{:, 1};
+X_ECM = DataECM(:, 5:end); Y_ECM = DataECM(:,2);
 % Data from cells running a WLTP drive cycle, and some from the aging study
 % are used as test data.
 cellsTest = [7,10,13,17,24,30,31];
@@ -83,18 +83,23 @@ Pipes_Linear = defineModelPipelines(@fitlm);
 warning('off')
 Pipes_Linear = fitPipes(Pipes_Linear, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
 save('results/pipes_linear.mat', Pipes_Linear)
+clearvars Pipes_Linear
 
 % Gaussian process models
 Pipes_GPR = defineModelPipelines(@fitrgp);
 % Compare each of these models using the train/CV and test sets
 warning('off')
 Pipes_GPR = fitPipes(Pipes_GPR, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
+save('results/pipes_gpr.mat', Pipes_GPR)
+clearvars Pipes_GPR
 
 % Random forest models
 Pipes_RF = defineModelPipelines(@fitrensemble);
 % Compare each of these models using the train/CV and test sets
 warning('off')
 Pipes_RF = fitPipes(Pipes_RF, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
+save('results/pipes_rf.mat', Pipes_RF)
+clearvars Pipes_RF
 
 %% DCIR models
 % Predict capacity using DC resistance metrics rather than AC impedance.
