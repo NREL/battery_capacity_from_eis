@@ -7,16 +7,9 @@ clear; close all; clc;
 addpath(genpath('functions'))
 
 % Load the data tables
-load('data\Data_Denso2021.mat', 'Data', 'DataFormatted', 'Data2Formatted')
-freq = Data.Freq(1,:);
-% Filter out noisy interpolated data
-idxKeep = filterInterpData(Data);
-DataFormatted = DataFormatted(idxKeep, :);
+load('data\Data_Denso2021.mat', 'DataFormatted', 'Data2Formatted')
 Data = combineDataTables(DataFormatted, Data2Formatted);
-% Remove BOL data (seriesIdx = 43 & 44, the magnitude of the impedance is
-% quite a bit different for these cells compared to the aging test matrix cells).
-Data = Data(1:1194, :);
-clearvars DataFormatted Data2Formatted
+freq = Data.Freq(1,:);
 
 % Some colors for plots
 colors1 = brewermap('RdPu', 22);
@@ -34,35 +27,40 @@ colorsTest = colors(idxTest, :);
 
 clearvars -except Data freq colortriplet colorsTrain colorsTest
 
-%% Search for optimal single frequency model, linear estimator, -10C EIS
-% Mask off just -10C EIS data
-mask_m10C = Data.TdegC_EIS == -10 & Data.soc_EIS == 0.5;
-Data_m10C = Data(mask_m10C, :);
+%% Organize data and splitter objects for pipeline training, CV, and test
 % Pull out X and Y data tables. X variables are any Zreal, Zimag, Zmag, and
 % Zphz data points. Y variable is the relative discharge capacity, q.
-X = Data_m10C(:, 6:end); Y = Data_m10C(:,2); seriesIdx = Data_m10C{:, 1};
+X = Data(:, 5:end); Y = Data(:,2); seriesIdx = Data{:, 1};
+X_ECM = DataECM(:, 5:end); Y_ECM = DataECM(:,2);
 % Data from cells running a WLTP drive cycle, and some from the aging study
 % are used as test data.
 cellsTest = [7,10,13,17,24,30,31];
-maskTest = any(Data_m10C.seriesIdx == cellsTest,2);
+maskTest = any(Data.seriesIdx == cellsTest,2);
 data.Xtest = X(maskTest,:); data.Ytest = Y(maskTest,:); 
+dataECM.Xtest = X_ECM(maskTest,:); dataECM.Ytest = Y_ECM(maskTest,:);
 seriesIdxTest = seriesIdx(maskTest);
 % Cross-validation and training are conducted on the same data split.
 data.Xcv = X(~maskTest,:); data.Ycv = Y(~maskTest,:); 
+dataECM.Xcv = X_ECM(~maskTest,:); dataECM.Ycv = Y(~maskTest,:);
 seriesIdxCV = seriesIdx(~maskTest);
 % Define a cross-validation scheme.
 cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
 
+%% Search for optimal single frequency model, linear estimator, -10C EIS
 % Define the estimator
 estimator = @fitlm;
-
 % Define model pipelines
 name = strings(length(freq), 1);
 idxFreq = [1:length(freq)]';
 for i = 1:length(freq)
-    seq = {@RegressionPipeline.normalizeZScore,...
-        @selectFrequency};
-    hyp = {{}, {"idxFreq", idxFreq(i)}};
+    seq = {...
+        @RegressionPipeline.normalizeZScore,...
+        @selectFrequency...
+        };
+    hyp = {...
+        {},...
+        {"idxFreq", idxFreq(i)}...
+        };
     Pipe = RegressionPipeline(estimator,...
         "FeatureTransformationSequence", seq,...
         "FeatureTransformationFixedHyp", hyp);
@@ -87,8 +85,38 @@ plot(freq, Pipes.maeTest,     '-', 'Color', colortriplet(1,:), 'LineWidth', 1.5)
 legend("Linear, CV", "Linear, Test")
 set(gca, 'XScale', 'log'); ylim([0 Inf])
 xlabel('Frequency (Hz)');
-ylabel('MAE (-10\circC EIS)')
+ylabel('MAE')
 set(gcf, 'Units', 'inches', 'Position', [3.5,5,3.25,2.5])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 %% GPR double frequency model trained on all EIS data
 % Use the optimal frequencies found by the exhaustive search.
@@ -452,9 +480,6 @@ end
 end
 
 function Data = combineDataTables(DataFormatted, Data2Formatted)
-% Need to add an isInterpEIS column to Data2Formatted to combine them.
-Data2Formatted.isInterpEIS = zeros(height(Data2Formatted),1);
-Data2Formatted = movevars(Data2Formatted, 'isInterpEIS', 'After', 'q');
 % Make seriesIdx consistent for cells that have repeat data in DataFormatted 
 % and Data2Formatted
 Data2Formatted.seriesIdx(Data2Formatted.seriesIdx == 32) = 1;

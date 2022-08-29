@@ -30,6 +30,9 @@ Data tables in 'data\Data_Denso2021.mat':
 % Load the data tables
 load('data\Data_Denso2021.mat', 'DataFormatted', 'Data2Formatted')
 Data = combineDataTables(DataFormatted, Data2Formatted);
+% Remove series 43 and 44 (cells measured at BOL and not aged)
+Data(Data.seriesIdx == 43, :) = [];
+Data(Data.seriesIdx == 44, :) = [];
 
 % Load equivalent circuit model fit parameters as a separate table
 DataECM = importfile("python/DensoData_EIS_parameters.csv");
@@ -42,23 +45,14 @@ DataECM = combineDataTables(DataECM, DataECM2);
 % RC1 and RC2 order is not always right (RC1 should be at higher 
 % characteristic frequency than RC2 for consistency):
 DataECM = fixRCpairs(DataECM);
-
-% % % Split into 25C and -10C, 50% SOC data sets for the initial modeling study
-% % % -10C
-% % mask_m10C = DataAll.TdegC_EIS == -10 & DataAll.soc_EIS == 0.5;
-% % Data_m10C = DataAll(mask_m10C, :); DataECM_m10C = DataAllECM(mask_m10C, :);
-% % % Remove BOL cell data (seriesIdx = 44, much different from aged cells)
-% % Data_m10C = Data_m10C(1:end-1, :); DataECM_m10C = DataECM_m10C(1:end-1, :);
-% % % 25C
-% % mask_25C = DataAll.TdegC_EIS == 25 & DataAll.soc_EIS == 0.5;
-% % Data_25C = DataAll(mask_25C, :); DataECM_25C = DataAllECM(mask_25C, :);
-% % % Remove BOL cell data (seriesIdx = 43 & 44, much different from aged cells)
-% % Data_25C = Data_25C(1:end-2, :); DataECM_25C = DataECM_25C(1:end-2, :);
+% Remove series 43 and 44 (cells measured at BOL and not aged)
+DataECM(DataECM.seriesIdx == 43, :) = [];
+DataECM(DataECM.seriesIdx == 44, :) = [];
 
 % Clean up
 clearvars DataFormatted Data2Formatted DataECM2
 
-%% Modeling
+%% Organize data and splitter objects for pipeline training, CV, and test
 % Pull out X and Y data tables. X variables are any Zreal, Zimag, Zmag, and
 % Zphz data points. Y variable is the relative discharge capacity, q.
 X = Data(:, 5:end); Y = Data(:,2); seriesIdx = Data{:, 1};
@@ -77,12 +71,22 @@ seriesIdxCV = seriesIdx(~maskTest);
 % Define a cross-validation scheme.
 cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
 
+%% Train pipelines
 % Linear estimator pipelines
 Pipes_Linear = defineModelPipelines(@fitlm);
 % Compare each of these models using the train/CV and test sets
 warning('off')
 Pipes_Linear = fitPipes(Pipes_Linear, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
-save('results/pipes_linear.mat', Pipes_Linear)
+save('results/pipes_linear.mat', 'Pipes_Linear')
+% display best double freq and SISSO models (these features works the best)
+disp('Best double freq model freq indices:')
+disp(Pipes_Linear.Model{4,1}.idxFreq(Pipes_Linear.idxMinTest(4),:))
+disp('Best SISSO model:')
+disp([Pipes_Linear.Model{6,1}.nNonzeroCoeffs(Pipes_Linear.idxMinTest(6),:),...
+    Pipes_Linear.Model{6,1}.nFeaturesPerSisIter(Pipes_Linear.idxMinTest(6),:)])
+% save without models (smaller file size)
+Pipes_Linear = removevars(Pipes_Linear, 'Model');
+save('results/pipes_linear_noModels.mat', 'Pipes_Linear')
 clearvars Pipes_Linear
 
 % Gaussian process models
@@ -90,7 +94,15 @@ Pipes_GPR = defineModelPipelines(@fitrgp);
 % Compare each of these models using the train/CV and test sets
 warning('off')
 Pipes_GPR = fitPipes(Pipes_GPR, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
-save('results/pipes_gpr.mat', Pipes_GPR)
+save('results/pipes_gpr.mat', 'Pipes_GPR')
+% save without models (smaller file size)
+Pipes_GPR = removevars(Pipes_GPR, 'Model');
+save('results/pipes_gpr_noModels.mat', 'Pipes_GPR')
+% display best double freq and SISSO models (these features works the best)
+disp(Pipes_GPR.Model{4,1}.idxFreq(Pipes_GPR.idxMinTest(4),:))
+disp('Best SISSO model:')
+disp([Pipes_GPR.Model{6,1}.nNonzeroCoeffs(Pipes_GPR.idxMinTest(6),:),...
+      Pipes_GPR.Model{6,1}.nFeaturesPerSisIter(Pipes_GPR.idxMinTest(6),:)])
 clearvars Pipes_GPR
 
 % Random forest models
@@ -98,8 +110,188 @@ Pipes_RF = defineModelPipelines(@fitrensemble);
 % Compare each of these models using the train/CV and test sets
 warning('off')
 Pipes_RF = fitPipes(Pipes_RF, data, dataECM, cvsplit, seriesIdxCV, seriesIdxTest);
-save('results/pipes_rf.mat', Pipes_RF)
+save('results/pipes_rf.mat', 'Pipes_RF')
+% save without models (smaller file size)
+Pipes_RF = removevars(Pipes_RF, 'Model');
+save('results/pipes_rf_noModels.mat', 'Pipes_RF')
+% display best double freq and SISSO models (these features works the best)
+disp(Pipes_RF.Model{4,1}.idxFreq(Pipes_RF.idxMinTest(4),:))
+disp('Best SISSO model:')
+disp([Pipes_RF.Model{6,1}.nNonzeroCoeffs(Pipes_RF.idxMinTest(6),:),...
+      Pipes_RF.Model{6,1}.nFeaturesPerSisIter(Pipes_RF.idxMinTest(6),:)])
 clearvars Pipes_RF
+
+%% Hyperparameter search on models with all features
+% Models using all features
+seq = {@RegressionPipeline.normalizeZScore};
+
+% Linear model with regularization hyperparameters
+Model_1A_Linear_HypOpt = RegressionPipeline(@fitrlinear,...
+    "FeatureTransformationSequence", seq,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1A_Linear_HypOpt, M1A_Linear_HypOpt_PredTrain] = train(Model_1A_Linear_HypOpt, data.Xcv, data.Ycv, seriesIdxCV);
+M1A_Linear_HypOpt_PredTest = predict(Model_1A_Linear_HypOpt, data.Xtest, data.Ytest, seriesIdxTest);
+
+% GPR model with hyperparameter search
+Model_1A_GPR_HypOpt = RegressionPipeline(@fitrgp,...
+    "FeatureTransformationSequence", seq,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1A_GPR_HypOpt, M1A_GPR_HypOpt_PredTrain] = train(Model_1A_GPR_HypOpt, data.Xcv, data.Ycv, seriesIdxCV);
+M1A_GPR_HypOpt_PredTest = predict(Model_1A_GPR_HypOpt, data.Xtest, data.Ytest, seriesIdxTest);
+
+% RF model with hyperparameter search
+Model_1A_RF_HypOpt = RegressionPipeline(@fitrensemble,...
+    "FeatureTransformationSequence", seq,...
+    "ModelFuncOpts", {'Method','Bag',...
+                      'OptimizeHyperparameters',...
+                            {'NumLearningCycles',...
+                             'MinLeafSize',...
+                             'MaxNumSplits',...
+                             'NumVariablesToSample'}...
+                             }...
+                         );
+[Model_1A_RF_HypOpt, M1A_RF_HypOpt_PredTrain] = train(Model_1A_RF_HypOpt, data.Xcv, data.Ycv, seriesIdxCV);
+M1A_RF_HypOpt_PredTest = predict(Model_1A_RF_HypOpt, data.Xtest, data.Ytest, seriesIdxTest);
+
+save('results/pipes_1A_HypOpt.mat', ...
+    'Model_1A_Linear_HypOpt','Model_1A_GPR_HypOpt','Model_1A_RF_HypOpt',...
+    'M1A_Linear_HypOpt_PredTrain','M1A_GPR_HypOpt_PredTrain','M1A_RF_HypOpt_PredTrain',...
+    'M1A_Linear_HypOpt_PredTest','M1A_GPR_HypOpt_PredTest','M1A_RF_HypOpt_PredTest');
+
+%% Hyperparameter search with best double frequency model
+%{
+Use hyperparameter optimization on the best two double frequency models
+from each model architecture
+%}
+% Models using two frequency features
+seq = {...
+    @RegressionPipeline.normalizeZScore,...
+    @selectFrequency...
+    };
+% Linear model with regularization hyperparameters
+load('results\pipes_linear.mat','Pipes_Linear');
+[~, idxModels] = sort(Pipes_Linear.maeTest{4});
+hyp = {{}, {"idxFreq", Pipes_Linear.Model{4}.idxFreq(idxModels(1),:)}};
+Model_1C_Linear_HypOpt_1 = RegressionPipeline(@fitrlinear,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1C_Linear_HypOpt_1, M1C_Linear_HypOpt_1_PredTrain] = train(Model_1C_Linear_HypOpt_1, data.Xcv, data.Ycv, seriesIdxCV);
+M1C_Linear_HypOpt_1_PredTest = predict(Model_1C_Linear_HypOpt_1, data.Xtest, data.Ytest, seriesIdxTest);
+
+hyp = {{}, {"idxFreq", Pipes_Linear.Model{4}.idxFreq(idxModels(2),:)}};
+Model_1C_Linear_HypOpt_2 = RegressionPipeline(@fitrlinear,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1C_Linear_HypOpt_2, M1C_Linear_HypOpt_2_PredTrain] = train(Model_1C_Linear_HypOpt_2, data.Xcv, data.Ycv, seriesIdxCV);
+M1C_Linear_HypOpt_2_PredTest = predict(Model_1C_Linear_HypOpt_2, data.Xtest, data.Ytest, seriesIdxTest);
+
+clearvars Pipes_Linear
+
+% GPR model with hyperparameter search
+load('results\pipes_gpr.mat','Pipes_GPR');
+[~, idxModels] = sort(Pipes_GPR.maeTest{4});
+hyp = {{}, {"idxFreq", Pipes_GPR.Model{4}.idxFreq(idxModels(1),:)}};
+Model_1C_GPR_HypOpt_1 = RegressionPipeline(@fitrgp,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1C_GPR_HypOpt_1, M1C_GPR_HypOpt_1_PredTrain] = train(Model_1C_GPR_HypOpt_1, data.Xcv, data.Ycv, seriesIdxCV);
+M1C_GPR_HypOpt_1_PredTest = predict(Model_1C_GPR_HypOpt_1, data.Xtest, data.Ytest, seriesIdxTest);
+
+hyp = {{}, {"idxFreq", Pipes_GPR.Model{4}.idxFreq(idxModels(2),:)}};
+Model_1C_GPR_HypOpt_2 = RegressionPipeline(@fitrgp,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1C_GPR_HypOpt_2, M1C_GPR_HypOpt_2_PredTrain] = train(Model_1C_GPR_HypOpt_2, data.Xcv, data.Ycv, seriesIdxCV);
+M1C_GPR_HypOpt_2_PredTest = predict(Model_1C_GPR_HypOpt_2, data.Xtest, data.Ytest, seriesIdxTest);
+clearvars Pipes_GPR
+
+% RF model with hyperparameter search
+load('results\pipes_rf.mat','Pipes_RF');
+[~, idxModels] = sort(Pipes_RF.maeTest{4});
+hyp = {{}, {"idxFreq", Pipes_RF.Model{4}.idxFreq(idxModels(1),:)}};
+Model_1C_RF_HypOpt_1 = RegressionPipeline(@fitrensemble,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'Method','Bag',...
+                      'OptimizeHyperparameters',...
+                            {'NumLearningCycles',...
+                             'MinLeafSize',...
+                             'MaxNumSplits',...
+                             'NumVariablesToSample'}...
+                             }...
+                         );
+[Model_1C_RF_HypOpt_1, M1C_RF_HypOpt_1_PredTrain] = train(Model_1C_RF_HypOpt_1, data.Xcv, data.Ycv, seriesIdxCV);
+M1C_RF_HypOpt_1_PredTest = predict(Model_1C_RF_HypOpt_1, data.Xtest, data.Ytest, seriesIdxTest);
+
+hyp = {{}, {"idxFreq", Pipes_RF.Model{4}.idxFreq(idxModels(2),:)}};
+Model_1C_RF_HypOpt_2 = RegressionPipeline(@fitrensemble,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'Method','Bag',...
+                      'OptimizeHyperparameters',...
+                            {'NumLearningCycles',...
+                             'MinLeafSize',...
+                             'MaxNumSplits',...
+                             'NumVariablesToSample'}...
+                             }...
+                         );
+[Model_1C_RF_HypOpt_2, M1C_RF_HypOpt_2_PredTrain] = train(Model_1C_RF_HypOpt_2, data.Xcv, data.Ycv, seriesIdxCV);
+M1C_RF_HypOpt_2_PredTest = predict(Model_1C_RF_HypOpt_2, data.Xtest, data.Ytest, seriesIdxTest);
+clearvars Pipes_RF
+
+%%
+% Hyperparameter search with best SISSO frequency model
+% Models using SISSO feature selection on frequencies
+seq = {...
+    @RegressionPipeline.normalizeZScore,...
+    @fssisso...
+    };
+% Linear model with regularization hyperparameters
+hyp = {{}, {...
+    "y", [],...
+    "nNonzeroCoeffs", 4,...
+    "nFeaturesPerSisIter", 15}};
+Model_1E_Linear_HypOpt = RegressionPipeline(@fitrlinear,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1E_Linear_HypOpt, M1E_Linear_HypOpt_PredTrain] = train(Model_1E_Linear_HypOpt, data.Xcv, data.Ycv, seriesIdxCV);
+M1E_Linear_HypOpt_PredTest = predict(Model_1E_Linear_HypOpt, data.Xtest, data.Ytest, seriesIdxTest);
+
+% GPR model with hyperparameter search
+hyp = {{}, {...
+    "y", [],...
+    "nNonzeroCoeffs", 4,...
+    "nFeaturesPerSisIter", 15}};
+Model_1E_GPR_HypOpt = RegressionPipeline(@fitrgp,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+[Model_1E_GPR_HypOpt, M1E_GPR_HypOpt_PredTrain] = train(Model_1E_GPR_HypOpt, data.Xcv, data.Ycv, seriesIdxCV);
+M1E_GPR_HypOpt_PredTest = predict(Model_1E_GPR_HypOpt, data.Xtest, data.Ytest, seriesIdxTest);
+
+% RF model with hyperparameter search
+hyp = {{}, {...
+    "y", [],...
+    "nNonzeroCoeffs", 3,...
+    "nFeaturesPerSisIter", 30}};
+Model_1E_RF_HypOpt = RegressionPipeline(@fitrensemble,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp,...
+    "ModelFuncOpts", {'Method','Bag',...
+                      'OptimizeHyperparameters',...
+                            {'NumLearningCycles',...
+                             'MinLeafSize',...
+                             'MaxNumSplits',...
+                             'NumVariablesToSample'}...
+                             }...
+                         );
+[Model_1E_RF_HypOpt, M1E_RF_HypOpt_PredTrain] = train(Model_1E_RF_HypOpt, data.Xcv, data.Ycv, seriesIdxCV);
+M1E_RF_HypOpt_PredTest = predict(Model_1E_RF_HypOpt, data.Xtest, data.Ytest, seriesIdxTest);
 
 %% DCIR models
 % Predict capacity using DC resistance metrics rather than AC impedance.
@@ -300,7 +492,7 @@ end
 % Models_3b: Extract UMAP features, no feature selection
 n = [2;3;4;5];
 nNeighbors = [15;20;30;50;100];
-minDist = [0.01;0.03;0.06;0.1;0.3];
+minDist = [0.01;0.03;0.1;0.3;0.8];
 Models_3B = defineUmapModels(estimator, n, nNeighbors, minDist, "Models_3B");
 
 % Model 4: Extract graphical features, no feature selection

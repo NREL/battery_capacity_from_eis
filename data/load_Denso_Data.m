@@ -61,6 +61,7 @@ Data = movevars(Data, 'R25C', 'After', 'r25C');
 Data = movevars(Data, 'rm10C', 'After', 'R25C');
 Data = movevars(Data, 'Rm10C', 'After', 'rm10C');
 
+%{
 % Interpolate EIS
 %{
 We have more capacity measurements than we have impedance measurements.
@@ -78,7 +79,7 @@ than it is the capacity, so it's better to interpolate versus the DC
 resistance measurement rather than by the capacity.
 %}
 Data = interpolateData(Data, DensoData);
-
+%}
 
 
 % There's also data where both SOC and temperature were varied widely, both

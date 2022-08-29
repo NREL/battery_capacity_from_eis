@@ -2,11 +2,18 @@
 % A place to make data exploration figures for the article.
 clc; clear; close all;
 
+% frequency vector
+load('data\Data_Denso2021.mat', 'Data')
+freq = Data.Freq(1,:); clearvars Data
+
 % Load the data tables
-load('data\Data_Denso2021.mat', 'Data', 'Data2')
+load('data\Data_Denso2021_with_interp.mat', 'Data', 'Data2')
 % Filter out noisy interpolated data
 idxKeep = filterInterpData(Data);
 Data = Data(idxKeep, :);
+% Remove series 43 and 44 (cells measured at BOL and not aged)
+Data(Data.seriesIdx == 43, :) = [];
+Data(Data.seriesIdx == 44, :) = [];
 
 % Colormaps file path
 addpath(genpath('functions'))
@@ -50,13 +57,15 @@ ylabel('C/3 relative capacity (25\circC)')
 maskEIS = ~logical(DataA1.isInterpEIS);
 plot(DataA1.t(maskEIS), DataA1.q(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
 ylim([0.65 1.1]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [5.010416666666666,5.520833333333333,3.25,2.749999999999999]);
+set(gcf, 'Units', 'inches', 'Position', [3,3.75,3.25,2.749999999999999]);
 annotation(gcf,'textbox',...
     [0.82151282051282 0.821969696969697 0.0791282051282054 0.0984848484848488],...
     'String','a',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig1a.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig1a.eps', 'Resolution', 600)
 
 DataLineProp = setLineProp('-','Marker','.',...
     'LineWidth',1,'MarkerSize',12,...
@@ -65,15 +74,17 @@ plotData(DataA2, 't', 'q', DataLineProp, PlotOpt)
 ylabel('C/3 relative capacity (25\circC)')
 % Denote EIS measurements
 maskEIS = ~logical(DataA2.isInterpEIS);
-plot(DataA2.t(maskEIS), DataA2.q(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 12);
+plot(DataA2.t(maskEIS), DataA2.q(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
 ylim([0.65 1.1]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [8.375,5.520833333333333,3.25,2.749999999999999]);
+set(gcf, 'Units', 'inches', 'Position', [7.375,3.75,3.25,2.749999999999999]);
 annotation(gcf,'textbox',...
     [0.82151282051282 0.821969696969697 0.0791282051282054 0.0984848484848488],...
     'String','b',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig1b.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig1b.eps', 'Resolution', 600)
 
 % DC resistance plots
 PlotOpt = setPlotOpt(...
@@ -89,13 +100,15 @@ ylabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
 maskEIS = ~logical(DataA1.isInterpEIS);
 plot(DataA1.t(maskEIS), DataA1.rm10C(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
 ylim([0.7 1.7]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [5,1.84375,3.375,2.75]);
+set(gcf, 'Units', 'inches', 'Position', [3,0.25,3.375,2.75]);
 annotation(gcf,'textbox',...
     [0.824599240265906 0.753787878787879 0.0791282051282054 0.0984848484848488],...
     'String','c',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig1c.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig1c.eps', 'Resolution', 600)
 
 DataLineProp = setLineProp('-','Marker','.',...
     'LineWidth',1,'MarkerSize',12,...
@@ -104,9 +117,9 @@ plotData(DataA2, 't', 'rm10C', DataLineProp, PlotOpt)
 ylabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
 % Denote EIS measurements
 maskEIS = ~logical(DataA2.isInterpEIS);
-plot(DataA2.t(maskEIS), DataA2.rm10C(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 12);
+plot(DataA2.t(maskEIS), DataA2.rm10C(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
 ylim([0.7 1.7]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [8.364583333333332,1.854166666666667,3.375,2.729166666666667]);
+set(gcf, 'Units', 'inches', 'Position', [7.325,0.25,3.375,2.729166666666667]);
 annotation(gcf,'textbox',...
     [0.82151282051282 0.753787878787879 0.0791282051282054 0.0984848484848488],...
     'String','d',...
@@ -116,6 +129,8 @@ annotation(gcf,'textbox',...
 ax = gca; kids = ax.Children;
 lgd = legend(kids([8,5,3,1]), {'Storage','Cycling','Drive cycle','EIS'}, 'Location', 'northwest');
 title(lgd, 'Aging condition')
+exportgraphics(gcf, 'figures/data_fig1d.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig1d.eps', 'Resolution', 600)
 
 %%
 % Just plot all data on same graph
@@ -173,14 +188,16 @@ ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
 xlabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
 set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
 ax = gca; kids = ax.Children;
-lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
+lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Position', [0.525726495726496,0.588194444444444,0.342948717948718,0.234953703703704]);
 title(lgd, 'Aging condition')
 annotation(gcf,'textbox',...
-    [0.82151282051282 0.753787878787879 0.0791282051282054 0.0984848484848488],...
+    [0.827923076923076 0.830176767676767 0.0791282051282055 0.098484848484849],...
     'String','a',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig2a.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig2a.eps', 'Resolution', 600)
 
 % b
 % fit poly model locally, plot fit
@@ -206,11 +223,13 @@ set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.2
 % lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
 % title(lgd, 'Aging condition')
 annotation(gcf,'textbox',...
-    [0.82151282051282 0.753787878787879 0.0791282051282054 0.0984848484848488],...
+    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
     'String','b',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig2b.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig2b.eps', 'Resolution', 600)
 
 % c - dq/dr for each line as a function of q
 p = fit.p;
@@ -251,12 +270,14 @@ annotation(gcf,'textbox',...
     'FitBoxToText','off',...
     'EdgeColor','none');
 annotation(gcf,'textbox',...
-    [0.82151282051282 0.8 0.0791282051282054 0.0984848484848488],...
+    [0.824717948717948 0.827777777777778 0.0791282051282055 0.098484848484849],...
     'String','c',...
     'FontSize',12,...
     'FontName','Arial',...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig2c.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig2c.eps', 'Resolution', 600)
 
 % d-f: DCIR at different time constants
 load('data\Denso\DensoData.mat', 'DensoData');
@@ -278,11 +299,13 @@ set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.2
 % lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
 % title(lgd, 'Aging condition')
 annotation(gcf,'textbox',...
-    [0.82151282051282 0.753787878787879 0.0791282051282054 0.0984848484848488],...
+    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
     'String','d',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig2d.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig2d.eps', 'Resolution', 600)
 %0p1s
 plotData(DensoData, 'rm10C50soc0p1s', 'q', DataLineProp, PlotOpt)
 ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
@@ -292,11 +315,13 @@ set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.2
 % lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
 % title(lgd, 'Aging condition')
 annotation(gcf,'textbox',...
-    [0.82151282051282 0.753787878787879 0.0791282051282054 0.0984848484848488],...
+    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
     'String','e',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig2e.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig2e.eps', 'Resolution', 600)
 %10s
 plotData(DensoData, 'rm10C50soc10s', 'q', DataLineProp, PlotOpt)
 ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
@@ -307,32 +332,13 @@ xticks([0,1,3,5,7]);
 % lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
 % title(lgd, 'Aging condition')
 annotation(gcf,'textbox',...
-    [0.82151282051282 0.753787878787879 0.0791282051282054 0.0984848484848488],...
+    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
     'String','f',...
     'FontSize',12,...
     'FitBoxToText','off',...
     'EdgeColor','none');
-
-%% voltage profiles
-load('C:\Users\pgasper\Documents\GitHub\denso_eis_pipeline\data\Denso\DensoData.mat')
-d = DensoData(280:302,:);
-for i = 1:height(d)
-    discharge = d.Discharge{i};
-    dt = [0;diff(discharge.Time)];
-    ah = cumsum(dt.*abs(discharge.Current))./3600;
-    discharge.AmpHours = ah;
-    d.Discharge{i} = discharge;
-end
-figure; hold on; box on; grid on;
-c = colormap(plasma(height(d)));
-for i = 1:height(d)
-    discharge = d.Discharge{i};
-    plot(discharge.AmpHours, discharge.Voltage, '-', 'Color', c(i,:), 'LineWidth', 1.5)
-end
-xlabel('Discharged capacity (Ah)');
-ylabel('Voltage (V)');
-
-set(gcf, 'Units', 'inches', 'Position', [8,2,4,3]);
+exportgraphics(gcf, 'figures/data_fig2f.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig2f.eps', 'Resolution', 600)
 
 %% Plot 2: EIS trends versus capacity
 % For 1 storage, 1 cycling cell, plot EIS curves for -10C and 25C data
@@ -341,7 +347,6 @@ capacity = linspace(1, 0.6, 256);
 colors = plasma(256);
 
 % indices of frequency decades
-freq = Data.Freq(1,:);
 idxDecades = log10(freq) == round(log10(freq));
 
 % Storage cell: cell 1
@@ -354,17 +359,10 @@ figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
 nexttile; D = DataEIS1_m10C; hold on; box on; grid on;
 for i = 1:height(D)
     [~, idxColor] = min(abs(capacity - D.q(i)));
-    if D.isInterpEIS(i)
-        % interpolated EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, ':', 'Color', c, 'LineWidth', 1)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c)
-    else
-        % raw EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
-    end
+    % raw EIS
+    c = colors(idxColor,:);
+    plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
+    plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
 xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
@@ -373,17 +371,10 @@ xlim([0 0.008].*1e4); ylim([-0.005 0.003].*1e4); axis('square')
 nexttile; D = DataEIS1_25C; hold on; box on; grid on;
 for i = 1:height(D)
     [~, idxColor] = min(abs(capacity - D.q(i)));
-    if D.isInterpEIS(i)
-        % interpolated EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, ':', 'Color', c, 'LineWidth', 1)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c)
-    else
-        % raw EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
-    end
+    % raw EIS
+    c = colors(idxColor,:);
+    plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
+    plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
 xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
@@ -398,17 +389,10 @@ DataEIS2_25C = DataEIS2(DataEIS2.TdegC_EIS == 25, :);
 nexttile; D = DataEIS2_m10C; hold on; box on; grid on;
 for i = 1:height(D)
     [~, idxColor] = min(abs(capacity - D.q(i)));
-    if D.isInterpEIS(i)
-        % interpolated EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, ':', 'Color', c, 'LineWidth', 1)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c)
-    else
-        % raw EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
-    end
+    % raw EIS
+    c = colors(idxColor,:);
+    plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
+    plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
 xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
@@ -417,17 +401,10 @@ xlim([0 0.008].*1e4); ylim([-0.005 0.003].*1e4); axis('square')
 nexttile; D = DataEIS2_25C; hold on; box on; grid on;
 for i = 1:height(D)
     [~, idxColor] = min(abs(capacity - D.q(i)));
-    if D.isInterpEIS(i)
-        % interpolated EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, ':', 'Color', c, 'LineWidth', 1)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c)
-    else
-        % raw EIS
-        c = colors(idxColor,:);
-        plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
-        plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
-    end
+    % raw EIS
+    c = colors(idxColor,:);
+    plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
+    plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
 xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
@@ -443,7 +420,7 @@ c.Label.Position = [-1.065833330154419,0.494624137878418,0];
 c.TickLength = 0.02;
 c.Layout.Tile = 'east';
 
-set(gcf, 'Units', 'inches', 'Position', [4.697916666666666,6.65625,7.90625,1.75]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,7.90625,1.75]);
 
 annotation(gcf,'textbox',...
     [0.0734637681159421 0.797619047619048 0.0293030303030303 0.160714285714286],...
@@ -465,6 +442,9 @@ annotation(gcf,'textbox',...
     'String','d',...
     'FitBoxToText','off',...
     'EdgeColor','none');
+
+exportgraphics(gcf, 'figures/data_fig3.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig3.eps', 'Resolution', 600)
 
 %% Plot 3: EIS trends vs. temperature, SOC
 % ax1: BOL vs T
@@ -519,7 +499,7 @@ c.Label.Position = [-1.065833330154419,0.494624137878418,0];
 c.TickLength = 0.02;
 c.Layout.Tile = 'east';
 
-set(gcf, 'Units', 'inches', 'Position', [4.697916666666666,6.65625,4.3,1.75]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,4.3,1.75]);
 
 annotation(gcf,'textbox',...
     [0.557900726392252 0.803571428571428 0.0667966101694913 0.154761904761905],...
@@ -531,6 +511,9 @@ annotation(gcf,'textbox',...
     'String',{'a'},...
     'FitBoxToText','off',...
     'EdgeColor','none');
+
+exportgraphics(gcf, 'figures/data_fig4ab.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig4ab.eps', 'Resolution', 600)
 
 figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
 % Plot BOL vs T
@@ -564,7 +547,7 @@ c.Label.Position = [-1.065833330154419,0.494624137878418,0];
 c.TickLength = 0.02;
 c.Layout.Tile = 'east';
 
-set(gcf, 'Units', 'inches', 'Position', [4.697916666666666,6.65625,4.3,1.75]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,4.3,1.75]);
 
 annotation(gcf,'textbox',...
     [0.560322033898306 0.761904761904761 0.0667966101694913 0.154761904761905],...
@@ -577,7 +560,72 @@ annotation(gcf,'textbox',...
     'FitBoxToText','off',...
     'EdgeColor','none');
 
+exportgraphics(gcf, 'figures/data_fig4cd.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig4cd.eps', 'Resolution', 600)
+
+%% UMAP, data at all temps and socs
+DataAll = [Data(~logical(Data.isInterpEIS),[17,24,25,27,28]); Data2(:,[3,4,5,7,8])];
+
+X = DataAll{:,{'Zreal','Zimag'}}; X = zscore(X);
+
+min_dist = 1;
+n_neighbors = 20;
+umap = UMAP('min_dist',min_dist,'n_neighbors',n_neighbors);
+umap = umap.fit(X); 
+reduction = umap.embedding;
+
+markersize = 8; 
+
+% capacity colors
+figure; hold on; box on; grid on;
+colormap(plasma(256));
+scatter(reduction(:,1), reduction(:,2), markersize, DataAll.q, 'o', 'filled');
+cb = colorbar(); cb.Label.String = 'Rel. discharge capacity';
+xlabel('Component 1'); ylabel('Component 2');
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
+annotation(gcf,'textbox',...
+    [0.647367521367521 0.825 0.0695128205128205 0.0972222222222221],...
+    'String','a',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig5a.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig5a.eps', 'Resolution', 600)
+
+% temperature colors
+figure; hold on; box on; grid on;
+colormap(viridis(256));
+scatter(reduction(:,1), reduction(:,2), markersize, DataAll.TdegC_EIS, 'o', 'filled');
+cb = colorbar(); cb.Label.String = 'Temperature (\circC)';
+xlabel('Component 1'); ylabel('Component 2');
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
+annotation(gcf,'textbox',...
+    [0.647367521367521 0.825 0.0695128205128205 0.0972222222222221],...
+    'String','b',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig5b.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig5b.eps', 'Resolution', 600)
+
+% soc colors
+figure; hold on; box on; grid on;
+colormap(cividis(256));
+scatter(reduction(:,1), reduction(:,2), markersize, DataAll.soc_EIS, 'o', 'filled');
+cb = colorbar(); cb.Label.String = 'State of charge';
+xlabel('Component 1'); ylabel('Component 2');
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
+annotation(gcf,'textbox',...
+    [0.647367521367521 0.825 0.0695128205128205 0.0972222222222221],...
+    'String','c',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+exportgraphics(gcf, 'figures/data_fig5c.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig5c.eps', 'Resolution', 600)
+
 %% Plot 4: correlations
+% get rid of interp EIS data
+Data = Data(~logical(Data.isInterpEIS),:);
+DataTrain = Data(~any(Data.seriesIdx == cellsTest, 2), :);
+DataTest = Data(any(Data.seriesIdx == cellsTest, 2), :);
 % 25C data = DataA1 (train), DataA2 (test)
 %-10C Data
 DataB = Data(Data.TdegC_EIS == -10, :);
@@ -587,429 +635,151 @@ DataB1 = DataB(~maskTestB, :);
 % Test data
 DataB2 = DataB(maskTestB, :);
 
-figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
-% ZReal -10C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataB1.q, DataB1.Zreal)), '-k')
-plot(freq, abs(corr(DataB2.q, DataB2.Zreal)), ':k', 'LineWidth', 1.5)
-xlabel(t,'Frequency (Hz)', 'FontSize', 10); ylabel(t,["Absolute correlation with";"rel. discharge capacity"], 'FontSize', 10);
-title('Z_{Real} @ -10\circC (\Omega)'); lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-lgd.Layout.Tile = 'north'; ylim([0 1]); set(gca, 'XScale', 'log')
-% Zimag -10C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataB1.q, DataB1.Zimag)), '-k')
-plot(freq, abs(corr(DataB2.q, DataB2.Zimag)), ':k', 'LineWidth', 1.5)
-title('Z_{Imaginary} @ -10\circC (\Omega)'); ylim([0 1]); set(gca, 'XScale', 'log')
-% Zmag -10C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataB1.q, DataB1.Zmag)), '-k')
-plot(freq, abs(corr(DataB2.q, DataB2.Zmag)), ':k', 'LineWidth', 1.5)
-title('|Z| @ -10\circC (\Omega)'); ylim([0 1]); set(gca, 'XScale', 'log')
-% Zphz -10C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataB1.q, DataB1.Zphz)), '-k')
-plot(freq, abs(corr(DataB2.q, DataB2.Zphz)), ':k', 'LineWidth', 1.5)
-title('\angleZ @ -10\circC (\circ)'); ylim([0 1]); set(gca, 'XScale', 'log')
-
-% ZReal 25C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataA1.q, DataA1.Zreal)), '-k')
-plot(freq, abs(corr(DataA2.q, DataA2.Zreal)), ':k', 'LineWidth', 1.5)
-title('Z_{Real} @ 25\circC (\Omega)'); ylim([0 1]); set(gca, 'XScale', 'log')
-% Zimag 25C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataA1.q, DataA1.Zimag)), '-k')
-plot(freq, abs(corr(DataA2.q, DataA2.Zimag)), ':k', 'LineWidth', 1.5)
-title('Z_{Imaginary} @ 25\circC (\Omega)'); ylim([0 1]); set(gca, 'XScale', 'log')
-% Zmag 25C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataA1.q, DataA1.Zmag)), '-k')
-plot(freq, abs(corr(DataA2.q, DataA2.Zmag)), ':k', 'LineWidth', 1.5)
-title('|Z| @ 25\circC (\Omega)'); ylim([0 1]); set(gca, 'XScale', 'log')
-% Zphz 25C
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataA1.q, DataA1.Zphz)), '-k')
-plot(freq, abs(corr(DataA2.q, DataA2.Zphz)), ':k', 'LineWidth', 1.5)
-title('\angleZ @ 25\circC (\circ)'); ylim([0 1]); set(gca, 'XScale', 'log')
-
-set(gcf, 'Units', 'inches', 'Position', [7.104166666666666,6.0625,6.5,3.25])
-
-% one more time, but with a little less info. Earlier one might be too
-% much.
+lw = 1.25;
 figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
 % ZReal
 nexttile; hold on; box on; grid on;
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+% all data
+p1 = plot(freq, corr(DataTrain.q, DataTrain.Zreal), '-k', 'LineWidth', lw);
+p2 = plot(freq, corr(DataTest.q, DataTest.Zreal), '--k', 'LineWidth', lw, 'AlignVertexCenters', 'on');
 %-10C
-plot(freq, abs(corr(DataB1.q, DataB1.Zreal)), '-', 'Color', colortriplet(1,:), 'LineWidth', 2)
-plot(freq, abs(corr(DataB2.q, DataB2.Zreal)), ':', 'Color', colortriplet(1,:), 'LineWidth', 2, 'AlignVertexCenters', 'on')
+p3 = plot(freq, corr(DataB1.q, DataB1.Zreal), '-', 'Color', colortriplet(1,:), 'LineWidth', lw);
+p4 = plot(freq, corr(DataB2.q, DataB2.Zreal), '--', 'Color', colortriplet(1,:), 'LineWidth', lw);
 %25C
-plot(freq, abs(corr(DataA1.q, DataA1.Zreal)), '-', 'Color', colortriplet(2,:), 'LineWidth', 2)
-plot(freq, abs(corr(DataA2.q, DataA2.Zreal)), ':', 'Color', colortriplet(2,:), 'LineWidth', 2, 'AlignVertexCenters', 'on')
+p5 = plot(freq, corr(DataA1.q, DataA1.Zreal), '-', 'Color', colortriplet(2,:), 'LineWidth', lw);
+p6 = plot(freq, corr(DataA2.q, DataA2.Zreal), '--', 'Color', colortriplet(2,:), 'LineWidth', lw);
 %decorations
-xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('|corr(q,Z_{Real}(f))|' , 'FontSize', 10);
-% title('Z_{Real} (\Omega)'); 
-lgd = legend('Train data (-10 \circC)', 'Test data (-10 \circC)', 'Train data (25 \circC)', 'Test data (25 \circC)'); 
-lgd.Layout.Tile = 'east'; ylim([0 1]); set(gca, 'XScale', 'log')
+xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('corr(q,Z_{Real}(f))' , 'FontSize', 10);
+lgd = legend([p1 p2 p3 p4 p5 p6],...
+    {'Train data', 'Test data',...
+    'Train data (-10 \circC)', 'Test data (-10 \circC)',...
+    'Train data (25 \circC)', 'Test data (25 \circC)'}); 
+lgd.Layout.Tile = 'east'; ylim([-1 1]); set(gca, 'XScale', 'log')
+
 % Zimag
 nexttile; hold on; box on; grid on;
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+% all data
+plot(freq, corr(DataTrain.q, DataTrain.Zimag), '-k', 'LineWidth', lw)
+plot(freq, corr(DataTest.q, DataTest.Zimag), '--k', 'LineWidth', lw, 'AlignVertexCenters', 'on')
 %-10C
-plot(freq, abs(corr(DataB1.q, DataB1.Zimag)), '-', 'Color', colortriplet(1,:), 'LineWidth', 2)
-plot(freq, abs(corr(DataB2.q, DataB2.Zimag)), ':', 'Color', colortriplet(1,:), 'LineWidth', 2, 'AlignVertexCenters', 'on')
+plot(freq, corr(DataB1.q, DataB1.Zimag), '-', 'Color', colortriplet(1,:), 'LineWidth', lw)
+plot(freq, corr(DataB2.q, DataB2.Zimag), '--', 'Color', colortriplet(1,:), 'LineWidth', lw)
 %25C
-plot(freq, abs(corr(DataA1.q, DataA1.Zimag)), '-', 'Color', colortriplet(2,:), 'LineWidth', 2)
-plot(freq, abs(corr(DataA2.q, DataA2.Zimag)), ':', 'Color', colortriplet(2,:), 'LineWidth', 2, 'AlignVertexCenters', 'on')
+plot(freq, corr(DataA1.q, DataA1.Zimag), '-', 'Color', colortriplet(2,:), 'LineWidth', lw)
+plot(freq, corr(DataA2.q, DataA2.Zimag), '--', 'Color', colortriplet(2,:), 'LineWidth', lw)
 %label
-xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('|corr(q,Z_{Imaginary}(f))|', 'FontSize', 10);
-%title
-% title('Z_{Imaginary} (\Omega)'); 
-ylim([0 1]); set(gca, 'XScale', 'log')
-set(gcf, 'Units', 'inches', 'Position', [7.104166666666666,6.0625,6.5,2])
+xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('corr(q,Z_{Imaginary}(f))', 'FontSize', 10);
+ylim([-1 1]); set(gca, 'XScale', 'log')
+set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,2])
+
+exportgraphics(gcf, 'figures/data_fig6.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig6.eps', 'Resolution', 600)
 
 %% Plot 5: examine extracted statistical features
 
 % Statistical features:
 load('data\Data_Denso2021.mat', 'DataFormatted')
-X = DataFormatted(idxKeep, 26:end);
+X = DataFormatted(:, 25:end);
 X = generateFeaturesStatistical(X);
 w = size(X,2)/4;
+% separate by zreal, zimag, zmag, zphz
+X1 = X(:,1:w);
+X2 = X(:,w+1:(w*2));
+X3 = X(:,(w*2+1):(w*3));
+X4 = X(:,(w*3+1):end);
+% test mask
+maskTest = any(Data.seriesIdx == cellsTest, 2);
+% xlabels
 stats = ["Variance", "Mean", "Median", "IQR", "MAD", "MdAD", "Range"];
 stats = categorical(stats);
 
-figure; t = tiledlayout(2, 4, 'Padding', 'compact', 'TileSpacing', 'compact');
-% -10C
-X_ = X(Data.TdegC_EIS == -10, :);
-X1 = X_(:,1:w);
-X2 = X_(:,w+1:(w*2));
-X3 = X_(:,(w*2+1):(w*3));
-X4 = X_(:,(w*3+1):end);
-% ZReal -10C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataB1.q, X1{~maskTestB,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataB2.q, X1{maskTestB,:})), 'dr', 'LineWidth', 1.5)
-ylabel(t,["Absolute correlation with";"rel. discharge capacity"], 'FontSize', 10);
-title('Z_{Real} @ -10\circC (\Omega)'); lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-lgd.Layout.Tile = 'north'; ylim([0 1]);
-% Zimag -10C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataB1.q, X2{~maskTestB,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataB2.q, X2{maskTestB,:})), 'dr', 'LineWidth', 1.5)
-title('Z_{Imaginary} @ -10\circC (\Omega)'); ylim([0 1]);
-% Zmag -10C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataB1.q, X3{~maskTestB,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataB2.q, X3{maskTestB,:})), 'dr', 'LineWidth', 1.5)
-title('|Z| @ -10\circC (\Omega)'); ylim([0 1]);
-% Zphz -10C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataB1.q, X4{~maskTestB,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataB2.q, X4{maskTestB,:})), 'dr', 'LineWidth', 1.5)
-title('\angleZ @ -10\circC (\circ)'); ylim([0 1]);
-
-% 25C
-X_ = X(Data.TdegC_EIS == 25, :);
-X1 = X_(:,1:w);
-X2 = X_(:,w+1:(w*2));
-X3 = X_(:,(w*2+1):(w*3));
-X4 = X_(:,(w*3+1):end);
-% ZReal 25C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataA1.q, X1{~maskTestA,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataA2.q, X1{maskTestA,:})), 'dr', 'LineWidth', 1.5)
-title('Z_{Real} @ 25\circC (\Omega)'); ylim([0 1]);
-% Zimag 25C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataA1.q, X2{~maskTestA,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataA2.q, X2{maskTestA,:})), 'dr', 'LineWidth', 1.5)
-title('Z_{Imaginary} @ 25\circC (\Omega)'); ylim([0 1]);
-% Zmag 25C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataA1.q, X3{~maskTestA,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataA2.q, X3{maskTestA,:})), 'dr', 'LineWidth', 1.5)
-title('|Z| @ 25\circC (\Omega)'); ylim([0 1]);
-% Zphz 25C
-nexttile; hold on; box on; grid on;
-plot(stats, abs(corr(DataA1.q, X4{~maskTestA,:})), 'ok', 'MarkerFaceColor', 'k')
-plot(stats, abs(corr(DataA2.q, X4{maskTestA,:})), 'dr', 'LineWidth', 1.5)
-title('\angleZ @ 25\circC (\circ)'); ylim([0 1]);
-
-
-set(gcf, 'Units', 'inches', 'Position', [7.104166666666666,6.0625,6.5,4])
-
-
-% a different look:
 figure; t = tiledlayout(1, 4, 'Padding', 'compact', 'TileSpacing', 'compact');
-% -10C
-X_ = X(Data.TdegC_EIS == -10, :);
-X1 = X_(:,1:w);
-X2 = X_(:,w+1:(w*2));
-X3 = X_(:,(w*2+1):(w*3));
-X4 = X_(:,(w*3+1):end);
-% 25C
-XX_ = X(Data.TdegC_EIS == 25, :);
-XX1 = XX_(:,1:w);
-XX2 = XX_(:,w+1:(w*2));
-XX3 = XX_(:,(w*2+1):(w*3));
-XX4 = XX_(:,(w*3+1):end);
 % ZReal
 nexttile; hold on; box on; grid on;
-% -10C
-plot(stats, abs(corr(DataB1.q, X1{~maskTestB,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-plot(stats, abs(corr(DataB2.q, X1{maskTestB,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-% 25C
-plot(stats, abs(corr(DataA1.q, XX1{~maskTestA,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
-plot(stats, abs(corr(DataA2.q, XX1{maskTestA,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
+plot(stats, abs(corr(Data.q(~maskTest), X1{~maskTest,:})), 'ok', 'LineWidth', 1.5)
+plot(stats, abs(corr(Data.q(maskTest), X1{maskTest,:})), 'dk', 'LineWidth', 1.5)
 % decorations
 ylabel(t,["Absolute correlation with";"C/3 rel. discharge capacity"], 'FontSize', 10);
 title('Z_{Real}'); 
-lgd = legend('Train data (-10 \circC)', 'Test data (-10 \circC)', 'Train data (25 \circC)', 'Test data (25 \circC)'); 
+lgd = legend('Train data', 'Test data'); 
 lgd.Layout.Tile = 'east'; 
 ylim([0 1]);
 % Zimag
 nexttile; hold on; box on; grid on;
-% -10C
-plot(stats, abs(corr(DataB1.q, X2{~maskTestB,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-plot(stats, abs(corr(DataB2.q, X2{maskTestB,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-% 25C
-plot(stats, abs(corr(DataA1.q, XX2{~maskTestA,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
-plot(stats, abs(corr(DataA2.q, XX2{maskTestA,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
+plot(stats, abs(corr(Data.q(~maskTest), X2{~maskTest,:})), 'ok', 'LineWidth', 1.5)
+plot(stats, abs(corr(Data.q(maskTest), X2{maskTest,:})), 'dk', 'LineWidth', 1.5)
 title('Z_{Imaginary}'); ylim([0 1]);
 % Zmag
 nexttile; hold on; box on; grid on;
-% -10C
-plot(stats, abs(corr(DataB1.q, X3{~maskTestB,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-plot(stats, abs(corr(DataB2.q, X3{maskTestB,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-% 25C
-plot(stats, abs(corr(DataA1.q, XX3{~maskTestA,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
-plot(stats, abs(corr(DataA2.q, XX3{maskTestA,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
-title('|Z|'); ylim([0 1]);
+plot(stats, abs(corr(Data.q(~maskTest), X3{~maskTest,:})), 'ok', 'LineWidth', 1.5)
+plot(stats, abs(corr(Data.q(maskTest), X3{maskTest,:})), 'dk', 'LineWidth', 1.5)
+title('|Z|'); ylim([0 1]);  
 % Zphz
 nexttile; hold on; box on; grid on;
-% -10C
-plot(stats, abs(corr(DataB1.q, X4{~maskTestB,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-plot(stats, abs(corr(DataB2.q, X4{maskTestB,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(1,:))
-% 25C
-plot(stats, abs(corr(DataA1.q, XX4{~maskTestA,:})), 'o', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
-plot(stats, abs(corr(DataA2.q, XX4{maskTestA,:})), 'd', 'LineWidth', 1.5, 'Color', colortriplet(2,:))
+plot(stats, abs(corr(Data.q(~maskTest), X4{~maskTest,:})), 'ok', 'LineWidth', 1.5)
+plot(stats, abs(corr(Data.q(maskTest), X4{maskTest,:})), 'dk', 'LineWidth', 1.5)
 % title
 title('\angleZ'); ylim([0 1]);
 % size
-set(gcf, 'Units', 'inches', 'Position', [7.104166666666666,6.0625,6.5,2])
+set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,2])
 
+exportgraphics(gcf, 'figures/data_fig7.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig7.eps', 'Resolution', 600)
 
 %% Plot 6: examine extracted PCA, UMAP features
-addpath('C:\Users\pgasper\Documents\GitHub\ml_utils_matlab')
+DataAll = [Data(:,[1,17,24,25,27,28]); Data2(:,[1,3,4,5,7,8])];
+maskTest = any(DataAll.seriesIdx == cellsTest, 2);
+Xtrain = DataAll{~maskTest,{'Zreal','Zimag'}}; [Xtrain,mu,sigma] = zscore(Xtrain);
+Xtest = DataAll{maskTest,{'Zreal','Zimag'}}; Xtest = (Xtest - mu) ./ sigma;
 
-%{
-%UMAP %default = min_dist = 0.1, n_neighbors = 15
-% More neighbors seems to get broader trends, mapping more nicely to
-% capacity. Smaller min-dist also helps make clear groups, since there can
-% be many measurements with similar EIS data
-[reduction, umap, clusterIdentifiers, extras]=run_umap(zscore(X{:,1:138}),'min_dist',0.1,'n_neighbors',30,'verbose','none');
-% better
-[reduction, umap, clusterIdentifiers, extras]=run_umap(zscore(X{:,1:138}),'min_dist',0.05,'n_neighbors',30,'verbose','none');
-
-% plotting 2D reduction
-figure; gscatter(reduction(:,1), reduction(:,2), Data.seriesIdx, colors);
-figure; scatter(reduction(:,1), reduction(:,2), 8, Data.q); colorbar();
-
-
-% COMPARE TO PCA
-%}
-
-%umap params
-min_dist = 0.3;
-n_neighbors = 20;
-% PCA on -10C
-X = DataFormatted(idxKeep, [1,26:end]);
-X = X(Data.TdegC_EIS == -10, :);
-maskTest = any(X.seriesIdx == cellsTest, 2);
-X = X(:, 2:139); %redundant Zreal/Zimag and Zmag/Zphz data
-Xtrain = X(~maskTest, :); Xtest = X(maskTest,:);
-[Xtrain, mu, sigma] = zscore(Xtrain{:,:});
-% Transform
-[coeffBtrain,scoreBtrain,~,~,explained,means] = pca(Xtrain);
+% UMAP
+min_dist = 1;
+n_neighbors = 30;
 umap = UMAP('min_dist',min_dist,'n_neighbors',n_neighbors);
-umap = umap.fit(Xtrain);
-reductionBtrain = umap.embedding;
-% figure; plot(cumsum(explained(1:10))) % first ten features explain ~99.5% of the variance
-Xtest = (Xtest{:,:}-mu)./sigma;
-scoreBtest = (Xtest - means)*coeffBtrain(:,1:10);
-reductionBtest = umap.transform(Xtest);
-
-% PCA on 25C
-X = DataFormatted(idxKeep, [1,26:end]);
-X = X(Data.TdegC_EIS == 25, :);
-maskTest = any(X.seriesIdx == cellsTest, 2);
-X = X(:, 2:139); %redundant Zreal/Zimag and Zmag/Zphz data
-Xtrain = X(~maskTest, :); Xtest = X(maskTest,:);
-[Xtrain, mu, sigma] = zscore(Xtrain{:,:});
-[coeffAtrain,scoreAtrain,~,~,explained,means] = pca(Xtrain);
-umap = UMAP('min_dist',min_dist,'n_neighbors',n_neighbors);
-umap = umap.fit(Xtrain);
-reductionAtrain = umap.embedding;
-% figure; plot(cumsum(explained(1:10))) % first ten features explain ~99.3% of the variance
-Xtest = (Xtest{:,:}-mu)./sigma;
-scoreAtest = (Xtest - means)*coeffAtrain(:,1:10);
-reductionAtest = umap.transform(Xtest);
-
-%{
-% correlation of PCA scores
-figure; t = tiledlayout(2, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
-% -10C PCA
-nexttile; hold on; box on; grid on;
-plot(abs(corr(DataB1.q, scoreBtrain(:,1:10))), '-ok', 'MarkerFaceColor', 'k')
-plot(abs(corr(DataB2.q, scoreBtest)), ':dr', 'LineWidth', 1.5)
-ylabel(t,["Absolute correlation with rel. discharge capacity"], 'FontSize', 10);
-xlabel(t,'Principal component index', 'FontSize', 10)
-title('-10\circC EIS'); lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-lgd.Layout.Tile = 'north'; ylim([0 1]);
-% 25C PCA
-nexttile; hold on; box on; grid on;
-plot(abs(corr(DataA1.q, scoreAtrain(:,1:10))), '-ok', 'MarkerFaceColor', 'k')
-plot(abs(corr(DataA2.q, scoreAtest)), ':dr', 'LineWidth', 1.5)
-title('25\circC EIS'); ylim([0 1]);
-set(gcf, 'Units', 'inches', 'Position', [5,3,3.25,5])
-
-% scatter plots of scores vs capacity
-figure; t = tiledlayout(2, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
-%-10C 
-y1 = DataB1.q; y2 = DataB2.q;
-x1 = scoreBtrain;
-x2 = scoreBtest;
-% PCA 1
-nexttile; hold on; box on; grid on;
-plot(x1(:,1), y1, '.k', 'LineWidth', 1)
-plot(x2(:,1), y2, '+r', 'LineWidth', 1)
-title('-10\circC component 1')
-xlabel(t, 'Component score', 'FontSize', 10)
-ylabel(t, 'C/3 relative discharge capacity', 'FontSize', 10)
-lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-lgd.Layout.Tile = 'north';
-% PCA 2
-nexttile; hold on; box on; grid on;
-plot(x1(:,2), y1, '.k', 'LineWidth', 1)
-plot(x2(:,2), y2, '+r', 'LineWidth', 1)
-title('-10\circC component 2')
-
-%25C 
-y1 = DataA1.q; y2 = DataA2.q;
-x1 = scoreAtrain;
-x2 = scoreAtest;
-% PCA 1
-nexttile; hold on; box on; grid on;
-plot(x1(:,1), y1, '.k', 'LineWidth', 1)
-plot(x2(:,1), y2, '+r', 'LineWidth', 1)
-title('25\circC component 1')
-xlim([-15 50])
-% PCA 2
-nexttile; hold on; box on; grid on;
-plot(x1(:,2), y1, '.k', 'LineWidth', 1)
-plot(x2(:,2), y2, '+r', 'LineWidth', 1)
-title('25\circC component 2')
-xlim([-30 30])
-
-set(gcf, 'Units', 'inches', 'Position', [5,3,3.25,4])
-%}
-
+umap = umap.fit(Xtrain); 
+reductionTrain = umap.embedding;
+reductionTest = umap.transform(Xtest);
+% PCA
+[coeffTrain,scoreTrain,~,~,explained,means] = pca(Xtrain);
+scoreTest = (Xtest - means)*coeffTrain(:, 1:10);
 
 lw = 1.5;
 colors = plasma(256);
-% scatter plots of scores colored by series and capacity
+% scatter plots of scores colored by capacity
 figure; t = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
-%-10C 
-y1 = flipud(DataB1.q); y2 = flipud(DataB2.q);
-x1 = flipud(scoreBtrain);
-x2 = flipud(scoreBtest);
-% % PCA (colored by series)
+% PCA
 nexttile; hold on; box on; grid on;
-% gscatter(x1(:,1), x1(:,2), DataB1.seriesIdx, colorsTrain, [], 10, 'off');
-% gscatter(x2(:,1), x2(:,2), DataB2.seriesIdx, colorsTest, '+', 10, 'off');
-xlabel(t, 'Component 1', 'FontSize', 10)
-ylabel(t, 'Component 2', 'FontSize', 10)
-% title('-10\circC PCA (cell series)')
-% PCA (colored by capacity)
-% nexttile; hold on; box on; grid on;
-scatter(x1(:,1), x1(:,2), 25, y1, 's', 'filled');
-scatter(x2(:,1), x2(:,2), 40, y2, 'x', 'LineWidth', lw);
-colormap(colors);
-title('-10\circC PCA')
-lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-lgd.Layout.Tile = 'north';
+scatter(flipud(scoreTrain(:,1)), flipud(scoreTrain(:,2)), 10, flipud(DataAll.q(~maskTest)), 'o', 'filled');
+scatter(scoreTest(:,1), scoreTest(:,2), 80, DataAll.q(maskTest), 'x', 'LineWidth', lw);
+% axis([-15 50 -50 50]); yticks([-50 -30 -10 10 30 50]);
 
-%25C
-y1 = flipud(DataA1.q); y2 = flipud(DataA2.q);
-x1 = flipud(scoreAtrain);
-x2 = flipud(scoreAtest);
-% % PCA (colored by series)
-% nexttile; hold on; box on; grid on;
-% gscatter(x1(:,1), x1(:,2), DataA1.seriesIdx, colorsTrain, [], 10, 'off');
-% gscatter(x2(:,1), x2(:,2), DataA2.seriesIdx, colorsTest, '+', 10, 'off');
-% axis([-15 50 -50 50])
-% xlabel(t, 'Component 1', 'FontSize', 10)
-% ylabel(t, 'Component 2', 'FontSize', 10)
-% title('25\circC PCA (cell series)')
-% % % % lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-% % % % lgd.Layout.Tile = 'north';
-% PCA (colored by capacity)
-nexttile; hold on; box on; grid on;
-scatter(x1(:,1), x1(:,2), 25, y1, 's', 'filled');
-scatter(x2(:,1), x2(:,2), 40, y2, 'x', 'LineWidth', lw);
-axis([-15 50 -50 50]); yticks([-50 -30 -10 10 30 50]);
-title('25\circC PCA')
+colormap(colors);
+title('PCA', 'FontWeight', 'normal')
+lgd = legend('Train data', 'Test data', 'NumColumns', 2); 
+lgd.Layout.Tile = 'north';
 
 cb = colorbar(); cb.Label.String = 'Rel. discharge capacity';
 cb.Layout.Tile = 'east';
 cb.Label.Position = [-1.073333263397217,0.826218433420054,0];
 
-set(gcf, 'Units', 'inches', 'Position', [7.104166666666666,6.0625,6.5,3])
+xlabel('Component 1')
+ylabel('Component 2')
 
-
-figure; t = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
-% same, but for UMAP
-% scatter plots of scores colored by series and capacity
-% % % figure; t = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
-%-10C 
-y1 = DataB1.q; y2 = DataB2.q;
-x1 = reductionBtrain;
-x2 = reductionBtest;
-% % PCA (colored by series)
-% nexttile; hold on; box on; grid on;
-% gscatter(x1(:,1), x1(:,2), DataB1.seriesIdx, colorsTrain, [], 10, 'off');
-% gscatter(x2(:,1), x2(:,2), DataB2.seriesIdx, colorsTest, '+', 10, 'off');
-% xlabel(t, 'Component 1', 'FontSize', 10)
-% ylabel(t, 'Component 2', 'FontSize', 10)
-% title('-10\circC UMAP (cell series)')
-% % % % lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-% % % % lgd.Layout.Tile = 'north';
-% PCA (colored by capacity)
+% UMAP
 nexttile; hold on; box on; grid on;
-scatter(x1(:,1), x1(:,2), 25, y1, 's', 'filled');
-scatter(x2(:,1), x2(:,2), 40, y2, 'x', 'LineWidth', lw);
-title('-10\circC UMAP')
+scatter(reductionTrain(:,1), reductionTrain(:,2), 10, DataAll.q(~maskTest), 'o', 'filled');
+scatter(reductionTest(:,1), reductionTest(:,2), 80, DataAll.q(maskTest), 'x', 'LineWidth', lw);
+% axis([-15 50 -50 50]); yticks([-50 -30 -10 10 30 50]);
+title('UMAP', 'FontWeight', 'normal')
+xlabel('Component 1')
+% ylabel('Component 2')
 
-colormap(colors);
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2])
 
-%25C
-y1 = DataA1.q; y2 = DataA2.q;
-x1 = reductionAtrain;
-x2 = reductionAtest;
-% % PCA (colored by series)
-% nexttile; hold on; box on; grid on;
-% gscatter(x1(:,1), x1(:,2), DataA1.seriesIdx, colorsTrain, [], 10, 'off');
-% gscatter(x2(:,1), x2(:,2), DataA2.seriesIdx, colorsTest, '+', 10, 'off');
-% xlabel(t, 'Component 1', 'FontSize', 10)
-% ylabel(t, 'Component 2', 'FontSize', 10)
-% title('25\circC UMAP (cell series)')
-% % % % lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-% % % % lgd.Layout.Tile = 'north';
-% PCA (colored by capacity)
-nexttile; hold on; box on; grid on;
-scatter(x1(:,1), x1(:,2), 25, y1, 's', 'filled');
-scatter(x2(:,1), x2(:,2), 40, y2, 'x', 'LineWidth', lw);
-cb = colorbar(); cb.Label.String = 'Rel. discharge capacity';
-cb.Label.Position = [-1.073333263397217,0.826218433420054,0];
-title('25\circC UMAP')
-
+exportgraphics(gcf, 'figures/data_fig8.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig8.eps', 'Resolution', 600)
 
 %% Fig 7 - example of graphical features from -10C data
 % Grab a single EIS measurement, show graphical features
@@ -1017,50 +787,12 @@ D = Data(Data.seriesIdx == 16, :);
 D = D(1,:);
 
 %-10C
-figure; t = tiledlayout(2, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
-nexttile; box on; grid on; hold on;
+figure; box on; grid on; hold on;
 plot(D.Zreal.*1e4, D.Zimag.*1e4, '-k', 'LineWidth', 2)
 plot(D.Zreal(idxDecades).*1e4, D.Zimag(idxDecades).*1e4, 'dk', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
 xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
 xlim([0 0.008].*1e4); ylim([-0.005 0.003].*1e4); axis('square')
-
-% feature '0': Z values at f=1E4
-
-% feature 1: min(Zreal) at f<1E4
-Zreal_ = D.Zreal;
-Zreal_(freq>1E4) = Inf;
-[~, idx1] = min(Zreal_);
-plot(D.Zreal(idx1).*1e4, D.Zimag(idx1).*1e4, 'or', 'LineWidth', 2)
-
-% feature 2: max(-Zimag(f<10^2 & f>10^-1))
-Zimag_ = D.Zimag;
-Zimag_(freq>10^2 | freq<10^-1) = Inf;
-[~, idx2] = max(-1.*Zimag_);
-plot(D.Zreal(idx2).*1e4, D.Zimag(idx2).*1e4, 'or', 'LineWidth', 2)
-
-% feature 3: min(-Zimag(f<10^0 & f>10^-2)
-Zimag_ = D.Zimag;
-Zimag_(freq>10^0 | freq<10^-2) = -Inf;
-[~, idx3] = min(-1.*Zimag_);
-plot(D.Zreal(idx3).*1e4, D.Zimag(idx3).*1e4, 'or', 'LineWidth', 2)
-
-% feature 5: Z values at f(end)
-plot(D.Zreal(end).*1e4, D.Zimag(end).*1e4, 'or', 'LineWidth', 2)
-
-% 25C
-% Grab a single EIS measurement, show graphical features
-D = Data(Data.seriesIdx == 16, :);
-D = D(26,:);
-
-nexttile; box on; grid on; hold on;
-plot(D.Zreal.*1e4, D.Zimag.*1e4, '-k', 'LineWidth', 2)
-plot(D.Zreal(idxDecades).*1e4, D.Zimag(idxDecades).*1e4, 'dk', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
-set(gca, 'YDir', 'reverse');
-xlim([0.0006 0.0016].*1e4); ylim([-0.001 0.001].*1e4); axis('square')
-
-% feature '0': Z values at f=1E4
 
 % feature 1: min(Zreal) at f<1E4
 Zreal_ = D.Zreal;
@@ -1079,128 +811,21 @@ plot(D.Zreal(idx3).*1e4, D.Zimag(idx3).*1e4, 'or', 'LineWidth', 2)
 % feature 5: Z values at f(end)
 plot(D.Zreal(end).*1e4, D.Zimag(end).*1e4, 'or', 'LineWidth', 2)
 
-set(gcf, 'Units', 'inches', 'Position', [5,3,3.25,5])
+set(gcf, 'Units', 'inches', 'Position', [5,3,3.25,2.5])
 
-annotation(gcf,'textarrow',[0.676282051282051 0.666666666666667],...
-    [0.691666666666667 0.73125],'String',{'-Z_{Imaginary}','valley'},...
-    'HorizontalAlignment','center');
-annotation(gcf,'textarrow',[0.448717948717949 0.442307692307692],...
-    [0.664583333333333 0.614583333333334],'String',{'f = 10^4'},...
-    'HorizontalAlignment','center');
-annotation(gcf,'textarrow',[0.400641025641026 0.33974358974359],...
-    [0.739583333333333 0.711111111111111],'String',{'Min Z_{Real}'});
-annotation(gcf,'textarrow',[0.400641025641026 0.30448717948718],...
-    [0.252083333333333 0.221527777777778],'String',{'Min Z_{Real}'});
-annotation(gcf,'textarrow',[0.391025641025641 0.384615384615385],...
-    [0.175 0.125],'String',{'f = 10^4'},'HorizontalAlignment','center');
-annotation(gcf,'textarrow',[0.689102564102564 0.711538461538462],...
-    [0.86875 0.816666666666667],'String',{'Lowest','frequency'},...
-    'HorizontalAlignment','center');
-annotation(gcf,'textarrow',[0.448717948717949 0.387820512820512],...
-    [0.416666666666667 0.320833333333334],'String',{'f = 10^0'},...
-    'HorizontalAlignment','center');
-annotation(gcf,'textarrow',[0.333333333333333 0.330128205128205],...
-    [0.3625 0.31875],'String',{'f = 10^2'},'HorizontalAlignment','center');
-annotation(gcf,'textarrow',[0.682692307692308 0.682692307692308],...
-    [0.347916666666667 0.4125],'String',{'Lowest','frequency'},...
-    'HorizontalAlignment','center');
-annotation(gcf,'textarrow',[0.461538461538462 0.493589743589744],...
-    [0.875 0.827083333333333],'String',{'-Z_{Imaginary}','peak'},...
-    'HorizontalAlignment','center');
-annotation(gcf,'textbox',...
-    [0.241384615384615 0.90625 0.0791282051282051 0.05625],'String',{'a'},...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
-annotation(gcf,'textbox',...
-    [0.244589743589743 0.422916666666667 0.0791282051282051 0.05625],...
-    'String','b',...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
+annotation(gcf,'textarrow',[0.438034188034188 0.414529914529915],...
+    [0.313888888888889 0.233333333333333],'String',{'f = 10^4'});
+annotation(gcf,'textarrow',[0.408119658119658 0.331196581196581],...
+    [0.462888888888889 0.422222222222222],'String',{'Min Z_{Real}'});
+annotation(gcf,'textarrow',[0.344017094017094 0.333333333333333],...
+    [0.713888888888889 0.583333333333333],'String',{'f = 10^2'});
+annotation(gcf,'textarrow',[0.568376068376068 0.613247863247863],...
+    [0.683333333333333 0.602777777777778],'String',{'f = 10^0'});
+annotation(gcf,'textarrow',[0.645299145299145 0.694444444444444],...
+    [0.811111111111111 0.647222222222222],'String',{'Lowest freq.'});
 
-%% UMAP, data at all temps and socs
-DataAll = [Data(:,[17,24,25,27,28]); Data2(:,[3,4,5,7,8])];
-
-X = DataAll{:,{'Zreal','Zimag'}}; X = zscore(X);
-
-min_dist = 0.1;
-n_neighbors = 30;
-umap = UMAP('min_dist',min_dist,'n_neighbors',n_neighbors);
-umap = umap.fit(X); 
-reduction = umap.embedding;
-
-% capacity colors
-figure; hold on; box on; grid on;
-colormap(plasma(256));
-scatter(reduction(:,1), reduction(:,2), 25, DataAll.q, 's', 'filled');
-cb = colorbar(); cb.Label.String = 'Rel. discharge capacity';
-xlabel('Component 1'); ylabel('Component 2');
-set(gcf, 'Units', 'inches', 'Position', [5.52083333333333,3.7187,3.25,2.5]);
-
-% temperature colors
-figure; hold on; box on; grid on;
-colormap(viridis(256));
-scatter(reduction(:,1), reduction(:,2), 25, DataAll.TdegC_EIS, 's', 'filled');
-cb = colorbar(); cb.Label.String = 'Temperature (\circC)';
-xlabel('Component 1'); ylabel('Component 2');
-set(gcf, 'Units', 'inches', 'Position', [5.52083333333333,3.7187,3.25,2.5]);
-
-% soc colors
-figure; hold on; box on; grid on;
-colormap(cividis(256));
-scatter(reduction(:,1), reduction(:,2), 25, DataAll.soc_EIS, 's', 'filled');
-cb = colorbar(); cb.Label.String = 'State of charge';
-xlabel('Component 1'); ylabel('Component 2');
-set(gcf, 'Units', 'inches', 'Position', [5.52083333333333,3.7187,3.25,2.5]);
-
-%% DC resistance versus capacity
-load('data\Denso\DensoData.mat', 'DensoData');
-
-DensoData = DensoData(~isnan(DensoData.Rc25C50soc10s), :);
-q = DensoData.q;
-r25C = DensoData(:, [41:46]);
-r25C.r0p01s = mean(r25C{:,[1,4]},2);
-r25C.r0p1s = mean(r25C{:,[2,5]},2);
-r25C.r10s = mean(r25C{:,[3,6]},2);
-r25C = r25C(:, 7:end);
-rm10C = DensoData(:, [53:58]);
-rm10C.r0p01s = mean(rm10C{:,[1,4]},2);
-rm10C.r0p1s = mean(rm10C{:,[2,5]},2);
-rm10C.r10s = mean(rm10C{:,[3,6]},2);
-rm10C = rm10C(:, 7:end);
-
-% 25C
-figure; t = tiledlayout(1, 3, 'TileSpacing', 'compact', 'Padding', 'compact');
-nexttile;
-plot(r25C.r0p01s, q, '.k')
-xlabel('0.01s DC pulse resistance (\Omega)')
-nexttile;
-plot(r25C.r0p1s, q, '.k')
-xlabel('0.1s DC pulse resistance (\Omega)')
-nexttile;
-plot(r25C.r10s, q, '.k')
-xlabel('10s DC pulse resistance (\Omega)')
-% decorations
-ylabel(t, 'Rel. discharge capacity')
-title(t, 'Discharge capacity vs. 25 \circC DC pulse resistance')
-set(gcf, 'Units', 'inches', 'Position', [5.52083333333333,3.7187,6.5,2.5]);
-
-% m10C
-figure; t = tiledlayout(1, 3, 'TileSpacing', 'compact', 'Padding', 'compact');
-nexttile;
-plot(rm10C.r0p01s, q, '.k')
-xlabel('0.01s DC pulse resistance (\Omega)')
-nexttile;
-plot(rm10C.r0p1s, q, '.k')
-xlabel('0.1s DC pulse resistance (\Omega)')
-nexttile;
-plot(rm10C.r10s, q, '.k')
-xlabel('10s DC pulse resistance (\Omega)')
-% decorations
-ylabel(t, 'Rel. discharge capacity')
-title(t, 'Discharge capacity vs. -10 \circC DC pulse resistance')
-set(gcf, 'Units', 'inches', 'Position', [5.52083333333333,3.7187,6.5,2.5]);
+exportgraphics(gcf, 'figures/data_fig9.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig9.eps', 'Resolution', 600)
 
 %% Helper methods
 function idxKeep = filterInterpData(Data)
@@ -1223,22 +848,4 @@ for thisSeries = uniqueSeries'
     Zmag = Data.Zmag(maskSeries_25C, idxFreq);
     idxKeep(maskSeries_25C) = Zmag >= min(Zmag(~Data.isInterpEIS(maskSeries_25C))) & Zmag <= max(Zmag(~Data.isInterpEIS(maskSeries_25C)));
 end
-end
-
-function plotCorrelations(DataTrain, DataTest, freq)
-variableNames = DataTrain.Properties.VariableNames;
-figure;
-% ZReal
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataTrain.Qb3, DataTrain{:, contains(variableNames, 'ZReal')})), '-k');
-plot(freq, abs(corr(DataTest.Qb3, DataTest{:, contains(variableNames, 'ZReal')})), '--k');
-xlabel('Frequency (Hz)'); ylabel(["Absolute correlation with";"discharge capacity"]);
-title('Z_{Real}'); lgd = legend('Training Data', 'Testing Data', 'NumColumns', 2); 
-lgd.Layout.Tile = 'north'; ylim([0 1]); set(gca, 'XScale', 'log')
-% ZImag
-nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(DataTrain.Qb3, DataTrain{:, contains(variableNames, 'ZImag')})), '-k');
-plot(freq, abs(corr(DataTest.Qb3, DataTest{:, contains(variableNames, 'ZImag')})), '--k');
-xlabel('Frequency (Hz)'); ylabel(["Absolute correlation with";"discharge capacity"]); 
-title('Z_{Imag}'); ylim([0 1]); set(gca, 'XScale', 'log')
 end
