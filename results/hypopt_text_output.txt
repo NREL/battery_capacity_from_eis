@@ -1,0 +1,737 @@
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|    1 | Best   |   0.0040958 |     0.24292 |   0.0040958 |   0.0040958 |   2.7195e-07 | leastsquares |        lasso |
+|    2 | Best   |   0.0036749 |    0.076666 |   0.0036749 |   0.0038852 |   2.3497e-05 | leastsquares |        ridge |
+|    3 | Accept |   0.0062681 |     0.21725 |   0.0036749 |   0.0046781 |     0.062703 | leastsquares |        lasso |
+|    4 | Accept |    0.005612 |     0.10698 |   0.0036749 |   0.0036783 |       180.47 | leastsquares |        ridge |
+|    5 | Accept |   0.0037711 |    0.079391 |   0.0036749 |   0.0036752 |   6.5844e-06 | leastsquares |        ridge |
+|    6 | Best   |   0.0030523 |    0.091741 |   0.0030523 |   0.0030526 |    0.0010079 | leastsquares |        ridge |
+|    7 | Accept |    0.025076 |    0.081209 |   0.0030523 |   0.0073642 |     0.010569 | leastsquares |        ridge |
+|    8 | Accept |   0.0045979 |     0.13116 |   0.0030523 |   0.0030529 |   0.00020797 | leastsquares |        ridge |
+|    9 | Accept |   0.0057114 |      0.1013 |   0.0030523 |   0.0030544 |   0.00052881 | leastsquares |        ridge |
+|   10 | Accept |   0.0036705 |     0.11691 |   0.0030523 |   0.0033703 |   7.0591e-05 | leastsquares |        ridge |
+|   11 | Best   |   0.0025697 |     0.14162 |   0.0025697 |   0.0027194 |   1.2029e-06 | leastsquares |        ridge |
+|   12 | Accept |   0.0049704 |     0.11874 |   0.0025697 |   0.0027822 |   2.8008e-07 | leastsquares |        ridge |
+|   13 | Accept |   0.0035634 |     0.09578 |   0.0025697 |   0.0027759 |       13.313 | leastsquares |        ridge |
+|   14 | Accept |   0.0026723 |    0.093739 |   0.0025697 |   0.0028045 |       2.6787 | leastsquares |        ridge |
+|   15 | Best   |   0.0024831 |     0.12336 |   0.0024831 |   0.0027037 |      0.83989 | leastsquares |        ridge |
+|   16 | Accept |   0.0025058 |    0.098258 |   0.0024831 |   0.0052682 |   2.7909e-08 | leastsquares |        ridge |
+|   17 | Accept |   0.0031752 |     0.11328 |   0.0024831 |   0.0024838 |       1.9705 | leastsquares |        ridge |
+|   18 | Accept |   0.0048488 |      0.1126 |   0.0024831 |   0.0051288 |      0.32354 | leastsquares |        ridge |
+|   19 | Accept |   0.0081565 |    0.082689 |   0.0024831 |   0.0024841 |   2.8134e-08 |          svm |        ridge |
+|   20 | Best   |   0.0017702 |    0.064433 |   0.0017702 |    0.005112 |       5.2714 |          svm |        ridge |
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|   21 | Accept |   0.0023376 |    0.074405 |   0.0017702 |   0.0017705 |       22.102 |          svm |        ridge |
+|   22 | Best   |   0.0016869 |     0.07571 |   0.0016869 |   0.0016873 |       1.2962 |          svm |        ridge |
+|   23 | Accept |   0.0018649 |    0.066859 |   0.0016869 |   0.0016884 |      0.30288 |          svm |        ridge |
+|   24 | Accept |   0.0027887 |    0.085325 |   0.0016869 |   0.0016978 |     0.064092 |          svm |        ridge |
+|   25 | Accept |   0.0034551 |    0.057604 |   0.0016869 |   0.0017122 |       144.21 |          svm |        ridge |
+|   26 | Accept |   0.0028201 |    0.071367 |   0.0016869 |   0.0017204 |    0.0068489 |          svm |        ridge |
+|   27 | Accept |   0.0019071 |    0.064695 |   0.0016869 |   0.0017278 |   0.00085905 |          svm |        ridge |
+|   28 | Best   |   0.0016359 |    0.067498 |   0.0016359 |   0.0017325 |   0.00015343 |          svm |        ridge |
+|   29 | Accept |   0.0021031 |    0.062196 |   0.0016359 |   0.0017353 |   2.6535e-05 |          svm |        ridge |
+|   30 | Accept |   0.0030507 |    0.074104 |   0.0016359 |    0.001738 |   3.7209e-06 |          svm |        ridge |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 20.998 seconds
+Total objective function evaluation time: 2.9898
+
+Best observed feasible point:
+      Lambda      Learner    Regularization
+    __________    _______    ______________
+    0.00015343      svm          ridge     
+Observed objective function value = 0.0016359
+Estimated objective function value = 0.0017201
+Function evaluation time = 0.067498
+
+Best estimated feasible point (according to models):
+    Lambda    Learner    Regularization
+    ______    _______    ______________
+    1.2962      svm          ridge     
+Estimated objective function value = 0.001738
+Estimated function evaluation time = 0.070443
+
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|    1 | Best   |     0.22335 |      1282.4 |     0.22335 |     0.22335 |      0.48788 |       linear |  ardmatern32 |            - |         true |
+|    2 | Best   |     0.18144 |      11.976 |     0.18144 |      0.1831 |   0.00011463 |       linear |     matern52 |       0.1192 |         true |
+|    3 | Best   |   0.0020098 |      1.9324 |   0.0020098 |    0.019972 |     0.040943 |         none | rationalquad |      0.22543 |         true |
+|    4 | Accept |     0.21983 |      1304.1 |   0.0020098 |    0.002392 |      0.00136 |       linear | ardexponenti |            - |         true |
+|    5 | Accept |   0.0032827 |      1.2444 |   0.0020098 |   0.0026585 |     0.098122 |         none | rationalquad |      0.53806 |         true |
+|    6 | Accept |   0.0063091 |      2.7927 |   0.0020098 |   0.0022583 |      0.71503 |         none | rationalquad |       7.4318 |         true |
+|    7 | Best   |   0.0015901 |      1.0572 |   0.0015901 |   0.0019508 |   0.00010438 |         none | rationalquad |      0.28726 |         true |
+|    8 | Accept |   0.0019312 |      1.5232 |   0.0015901 |   0.0012851 |   0.00056534 |         none | rationalquad |     0.010691 |         true |
+|    9 | Accept |   0.0019383 |      1.4818 |   0.0015901 |   0.0014339 |   0.00011722 |         none | rationalquad |    0.0098458 |         true |
+|   10 | Accept |   0.0019253 |       1.111 |   0.0015901 |   0.0015488 |   0.00012978 |         none | rationalquad |     0.011457 |         true |
+|   11 | Accept |   0.0019346 |      1.2319 |   0.0015901 |   0.0016204 |   0.00010616 |         none | rationalquad |     0.010277 |         true |
+|   12 | Accept |     0.51518 |     0.23823 |   0.0015901 |   0.0018052 |    0.0001009 |         none |     matern52 |    0.0099192 |         true |
+|   13 | Accept |     0.20978 |      5.0508 |   0.0015901 |   0.0017924 |   0.00010023 |       linear | rationalquad |      0.28454 |         true |
+|   14 | Accept |   0.0019006 |      1.2774 |   0.0015901 |   0.0017803 |   0.00010439 |         none | rationalquad |     0.015444 |        false |
+|   15 | Accept |   0.0063064 |      2.8665 |   0.0015901 |   0.0017462 |      0.60239 |         none | rationalquad |       6.7209 |        false |
+|   16 | Accept |      41.661 |       4.604 |   0.0015901 |   0.0026536 |   0.00010587 |       linear | rationalquad |     0.040802 |        false |
+|   17 | Accept |     0.50867 |     0.26122 |   0.0015901 |   0.0026513 |   0.00010321 |         none |     matern52 |      0.29823 |        false |
+|   18 | Best   |   0.0013197 |     0.43893 |   0.0013197 |   0.0026488 |   0.00010924 |     constant |     matern52 |       7.6766 |         true |
+|   19 | Accept |   0.0043717 |     0.36476 |   0.0013197 |   0.0026467 |    0.0001003 |     constant |     matern52 |      0.26993 |        false |
+|   20 | Accept |   0.0015561 |      1.0006 |   0.0013197 |   0.0026448 |   0.00010073 |     constant | rationalquad |      0.22399 |        false |
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|   21 | Best   |   0.0012869 |      1.0998 |   0.0012869 |   0.0026432 |   0.00010114 |     constant | rationalquad |       1.3787 |         true |
+|   22 | Accept |     0.50094 |     0.33245 |   0.0012869 |   0.0026421 |   0.00010018 |         none |     matern32 |      0.38599 |         true |
+|   23 | Accept |     0.51144 |      0.3288 |   0.0012869 |   0.0026411 |   0.00010162 |         none |     matern32 |      0.17746 |        false |
+|   24 | Best   |   0.0012478 |     0.56289 |   0.0012478 |   0.0026399 |    0.0001008 |     constant |     matern32 |       6.8344 |        false |
+|   25 | Accept |   0.0031915 |      0.4208 |   0.0012478 |   0.0026388 |   0.00010387 |     constant |     matern32 |      0.99469 |         true |
+|   26 | Accept |     0.51507 |     0.16875 |   0.0012478 |   0.0026381 |   0.00010101 |         none |  exponential |      0.02321 |        false |
+|   27 | Accept |     0.51919 |     0.23755 |   0.0012478 |   0.0026374 |   0.00010088 |         none |  exponential |      0.01211 |         true |
+|   28 | Accept |    0.001689 |     0.36693 |   0.0012478 |   0.0026366 |   0.00010063 |     constant |  exponential |       3.0358 |        false |
+|   29 | Accept |   0.0024411 |     0.35788 |   0.0012478 |   0.0026358 |   0.00010084 |     constant |  exponential |       1.5702 |         true |
+|   30 | Accept |      42.596 |     0.21992 |   0.0012478 |   0.0026542 |    0.0001006 |       linear |  exponential |     0.012883 |        false |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 2664.3257 seconds
+Total objective function evaluation time: 2631.0599
+
+Best observed feasible point:
+      Sigma      BasisFunction    KernelFunction    KernelScale    Standardize
+    _________    _____________    ______________    ___________    ___________
+    0.0001008      constant          matern32         6.8344          false   
+Observed objective function value = 0.0012478
+Estimated objective function value = 0.0015602
+Function evaluation time = 0.56289
+
+Best estimated feasible point (according to models):
+      Sigma       BasisFunction     KernelFunction      KernelScale    Standardize
+    __________    _____________    _________________    ___________    ___________
+    0.00056534        none         rationalquadratic     0.010691         true    
+Estimated objective function value = 0.0026542
+Estimated function evaluation time = 1.3609
+
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|    1 | Best   |   0.0012085 |      5.9588 |   0.0012085 |   0.0012085 |          178 |            1 |           19 |           26 |
+|    2 | Accept |   0.0043172 |     0.69696 |   0.0012085 |   0.0026636 |           27 |           61 |            1 |           21 |
+|    3 | Accept |   0.0050023 |      6.0056 |   0.0012085 |   0.0012087 |          207 |          132 |            6 |          198 |
+|    4 | Best   |   0.0010347 |      45.477 |   0.0010347 |   0.0010353 |          439 |            4 |          201 |          260 |
+|    5 | Accept |   0.0037708 |     0.37077 |   0.0010347 |   0.0010349 |           18 |            2 |            1 |           21 |
+|    6 | Accept |   0.0010842 |      0.3682 |   0.0010347 |   0.0010351 |           11 |            1 |           73 |           32 |
+|    7 | Accept |   0.0010865 |      1.3862 |   0.0010347 |   0.0010352 |           15 |            3 |           60 |          211 |
+|    8 | Accept |   0.0010762 |      0.3657 |   0.0010347 |   0.0010354 |           13 |            2 |          217 |            5 |
+|    9 | Best   |  0.00099718 |     0.61823 |  0.00099718 |  0.00099815 |           18 |            2 |           97 |           34 |
+|   10 | Accept |   0.0010053 |     0.34111 |  0.00099718 |  0.00099902 |           11 |            3 |          130 |           25 |
+|   11 | Accept |   0.0013501 |     0.29017 |  0.00099718 |   0.0010001 |           11 |           16 |          332 |           20 |
+|   12 | Accept |   0.0010494 |     0.43608 |  0.00099718 |   0.0010023 |           11 |            2 |           78 |           48 |
+|   13 | Best   |  0.00096882 |     0.57291 |  0.00096882 |  0.00097797 |           17 |            3 |          132 |           37 |
+|   14 | Accept |   0.0010036 |      3.4405 |  0.00096882 |  0.00098637 |          163 |            1 |           60 |            4 |
+|   15 | Accept |   0.0063132 |     0.22185 |  0.00096882 |  0.00098834 |           11 |          178 |          317 |            2 |
+|   16 | Accept |   0.0011927 |     0.22295 |  0.00096882 |  0.00098794 |           10 |           11 |           56 |           11 |
+|   17 | Accept |   0.0012526 |     0.24353 |  0.00096882 |  0.00098496 |           11 |            8 |          184 |            8 |
+|   18 | Accept |   0.0016063 |     0.24024 |  0.00096882 |  0.00098513 |           10 |           23 |           45 |           27 |
+|   19 | Accept |   0.0012645 |      5.1325 |  0.00096882 |  0.00097773 |          270 |            3 |          125 |            1 |
+|   20 | Accept |   0.0012558 |     0.65104 |  0.00096882 |  0.00097611 |           10 |           11 |           98 |          252 |
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|   21 | Accept |   0.0010864 |      1.1745 |  0.00096882 |  0.00097403 |           12 |            3 |          227 |          263 |
+|   22 | Accept |   0.0012145 |      4.4334 |  0.00096882 |  0.00097512 |          184 |           14 |          298 |            9 |
+|   23 | Accept |   0.0010361 |      2.1417 |  0.00096882 |  0.00097553 |           93 |            7 |           85 |           12 |
+|   24 | Accept |   0.0011111 |      2.5841 |  0.00096882 |  0.00097498 |          129 |            6 |          291 |            3 |
+|   25 | Accept |   0.0011266 |      2.1216 |  0.00096882 |  0.00097515 |           18 |            1 |           84 |          268 |
+|   26 | Accept |   0.0010582 |     0.43019 |  0.00096882 |  0.00097493 |           15 |            1 |          355 |           19 |
+|   27 | Accept |   0.0011484 |     0.51505 |  0.00096882 |   0.0010637 |           26 |            1 |          153 |            2 |
+|   28 | Accept |   0.0010853 |       0.492 |  0.00096882 |   0.0010535 |           10 |            2 |           59 |           10 |
+|   29 | Accept |   0.0011247 |     0.27531 |  0.00096882 |  0.00097402 |           10 |            2 |          284 |            3 |
+|   30 | Accept |   0.0012795 |      1.1158 |  0.00096882 |   0.0010574 |           57 |           14 |           44 |            5 |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 108.7154 seconds
+Total objective function evaluation time: 88.3245
+
+Best observed feasible point:
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           17                 3             132                  37         
+Observed objective function value = 0.00096882
+Estimated objective function value = 0.0010667
+Function evaluation time = 0.57291
+
+Best estimated feasible point (according to models):
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           18                 2              97                  34         
+Estimated objective function value = 0.0010574
+Estimated function evaluation time = 0.55106
+
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|    1 | Best   |    0.003469 |     0.13539 |    0.003469 |    0.003469 |   3.1438e-08 |          svm |        lasso |
+|    2 | Accept |   0.0035409 |    0.084639 |    0.003469 |   0.0034703 |     0.028834 |          svm |        lasso |
+|    3 | Accept |   0.0063696 |    0.083956 |    0.003469 |   0.0034761 |       184.68 |          svm |        ridge |
+|    4 | Best   |   0.0025816 |    0.085523 |   0.0025816 |   0.0025819 |   3.4852e-05 | leastsquares |        ridge |
+|    5 | Accept |   0.0033634 |    0.062041 |   0.0025816 |   0.0025819 |   2.8245e-08 | leastsquares |        lasso |
+|    6 | Accept |   0.0062517 |    0.061796 |   0.0025816 |    0.002582 |       276.16 | leastsquares |        ridge |
+|    7 | Accept |   0.0029928 |    0.068479 |   0.0025816 |   0.0025824 |   0.00018287 | leastsquares |        ridge |
+|    8 | Best   |   0.0020723 |    0.070361 |   0.0020723 |   0.0020722 |   2.7955e-08 | leastsquares |        ridge |
+|    9 | Accept |   0.0062554 |    0.045813 |   0.0020723 |   0.0020722 |       16.632 | leastsquares |        lasso |
+|   10 | Best   |   0.0020712 |    0.076157 |   0.0020712 |   0.0020695 |   2.7221e-07 | leastsquares |        ridge |
+|   11 | Accept |   0.0025072 |     0.10993 |   0.0020712 |   0.0020701 |   2.8103e-08 |          svm |        ridge |
+|   12 | Accept |   0.0064391 |    0.056012 |   0.0020712 |   0.0020705 |       273.74 |          svm |        lasso |
+|   13 | Accept |   0.0025682 |     0.11726 |   0.0020712 |   0.0020704 |   1.0663e-05 |          svm |        ridge |
+|   14 | Accept |   0.0034873 |    0.082002 |   0.0020712 |   0.0020705 |   4.1353e-05 |          svm |        lasso |
+|   15 | Accept |   0.0020719 |    0.069589 |   0.0020712 |   0.0020672 |   8.7529e-08 | leastsquares |        ridge |
+|   16 | Accept |   0.0020719 |    0.071121 |   0.0020712 |    0.002069 |   9.3513e-08 | leastsquares |        ridge |
+|   17 | Accept |   0.0020718 |    0.079411 |   0.0020712 |   0.0020697 |    1.041e-07 | leastsquares |        ridge |
+|   18 | Accept |   0.0020723 |    0.078922 |   0.0020712 |   0.0020697 |   2.7932e-08 | leastsquares |        ridge |
+|   19 | Best   |    0.002071 |     0.07503 |    0.002071 |   0.0020694 |   3.2224e-07 | leastsquares |        ridge |
+|   20 | Accept |   0.0020717 |    0.090364 |    0.002071 |   0.0020698 |   1.2657e-07 | leastsquares |        ridge |
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|   21 | Accept |   0.0033662 |    0.057545 |    0.002071 |   0.0020698 |   3.8546e-05 | leastsquares |        lasso |
+|   22 | Accept |   0.0062554 |     0.07457 |    0.002071 |   0.0020707 |     0.027761 | leastsquares |        lasso |
+|   23 | Accept |   0.0025062 |     0.11941 |    0.002071 |   0.0020706 |    5.298e-07 |          svm |        ridge |
+|   24 | Accept |   0.0020711 |    0.076908 |    0.002071 |   0.0020715 |   7.7985e-07 | leastsquares |        ridge |
+|   25 | Best   |   0.0020709 |    0.090464 |   0.0020709 |   0.0020692 |   4.2841e-07 | leastsquares |        ridge |
+|   26 | Accept |   0.0020709 |    0.070665 |   0.0020709 |   0.0020695 |   3.9613e-07 | leastsquares |        ridge |
+|   27 | Accept |   0.0020721 |    0.082668 |   0.0020709 |   0.0020695 |   4.8931e-08 | leastsquares |        ridge |
+|   28 | Accept |   0.0034276 |    0.069727 |   0.0020709 |   0.0020695 |      0.10591 |          svm |        ridge |
+|   29 | Accept |   0.0049849 |    0.047933 |   0.0020709 |   0.0020695 |      0.54519 | leastsquares |        ridge |
+|   30 | Accept |   0.0062554 |    0.051926 |   0.0020709 |   0.0020695 |       277.87 | leastsquares |        lasso |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 16.4067 seconds
+Total objective function evaluation time: 2.3456
+
+Best observed feasible point:
+      Lambda        Learner       Regularization
+    __________    ____________    ______________
+    4.2841e-07    leastsquares        ridge     
+Observed objective function value = 0.0020709
+Estimated objective function value = 0.0020697
+Function evaluation time = 0.090464
+
+Best estimated feasible point (according to models):
+      Lambda        Learner       Regularization
+    __________    ____________    ______________
+    3.2224e-07    leastsquares        ridge     
+Estimated objective function value = 0.0020695
+Estimated function evaluation time = 0.078382
+
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|    1 | Best   |    0.003024 |    0.072696 |    0.003024 |    0.003024 |   3.0576e-08 | leastsquares |        lasso |
+|    2 | Best   |   0.0029777 |    0.061678 |   0.0029777 |   0.0030008 |    0.0018491 | leastsquares |        ridge |
+|    3 | Accept |   0.0037433 |    0.061095 |   0.0029777 |   0.0032481 |      0.86004 |          svm |        ridge |
+|    4 | Accept |   0.0066233 |    0.058156 |   0.0029777 |   0.0040848 |       105.18 |          svm |        lasso |
+|    5 | Best   |   0.0018673 |     0.06087 |   0.0018673 |    0.001868 |   9.1737e-07 | leastsquares |        ridge |
+|    6 | Accept |   0.0018673 |    0.061975 |   0.0018673 |   0.0018669 |   2.7921e-08 | leastsquares |        ridge |
+|    7 | Accept |   0.0063491 |    0.044969 |   0.0018673 |   0.0018671 |       31.718 | leastsquares |        lasso |
+|    8 | Accept |    0.001991 |    0.098246 |   0.0018673 |    0.001867 |   2.7951e-08 |          svm |        ridge |
+|    9 | Accept |   0.0019105 |     0.10772 |   0.0018673 |   0.0018669 |   6.2267e-06 |          svm |        ridge |
+|   10 | Accept |    0.003562 |    0.079357 |   0.0018673 |   0.0018671 |   2.8169e-08 |          svm |        lasso |
+|   11 | Best   |   0.0018673 |     0.08433 |   0.0018673 |   0.0018604 |   1.6323e-07 | leastsquares |        ridge |
+|   12 | Accept |   0.0019093 |     0.11315 |   0.0018673 |   0.0018571 |    6.088e-07 |          svm |        ridge |
+|   13 | Best   |   0.0018673 |    0.063622 |   0.0018673 |   0.0018628 |   1.9567e-07 | leastsquares |        ridge |
+|   14 | Accept |   0.0063469 |    0.046977 |   0.0018673 |   0.0018626 |       273.93 | leastsquares |        ridge |
+|   15 | Best   |   0.0018673 |    0.063079 |   0.0018673 |    0.001864 |   2.2135e-07 | leastsquares |        ridge |
+|   16 | Accept |   0.0018673 |    0.074354 |   0.0018673 |   0.0018641 |   2.8121e-08 | leastsquares |        ridge |
+|   17 | Best   |   0.0018673 |    0.073929 |   0.0018673 |   0.0018649 |   2.6255e-07 | leastsquares |        ridge |
+|   18 | Accept |   0.0018673 |    0.069766 |   0.0018673 |   0.0018651 |   9.8707e-08 | leastsquares |        ridge |
+|   19 | Best   |   0.0018673 |    0.067713 |   0.0018673 |   0.0018652 |   4.4998e-07 | leastsquares |        ridge |
+|   20 | Accept |   0.0018673 |    0.065491 |   0.0018673 |   0.0018653 |   2.8048e-08 | leastsquares |        ridge |
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|   21 | Accept |   0.0034859 |    0.061573 |   0.0018673 |   0.0018656 |    0.0013657 | leastsquares |        lasso |
+|   22 | Best   |   0.0018673 |    0.061834 |   0.0018673 |   0.0018657 |   4.9743e-07 | leastsquares |        ridge |
+|   23 | Accept |   0.0018673 |    0.070569 |   0.0018673 |   0.0018657 |   8.4316e-08 | leastsquares |        ridge |
+|   24 | Accept |   0.0035278 |    0.091786 |   0.0018673 |   0.0018661 |    0.0021118 |          svm |        lasso |
+|   25 | Accept |   0.0018676 |    0.065665 |   0.0018673 |    0.001867 |   2.2196e-06 | leastsquares |        ridge |
+|   26 | Accept |   0.0018673 |    0.083309 |   0.0018673 |   0.0018671 |   9.9075e-07 | leastsquares |        ridge |
+|   27 | Accept |   0.0065806 |    0.056335 |   0.0018673 |   0.0018672 |       277.44 |          svm |        ridge |
+|   28 | Accept |   0.0021975 |    0.097912 |   0.0018673 |   0.0018671 |   0.00042561 |          svm |        ridge |
+|   29 | Accept |   0.0029236 |    0.069245 |   0.0018673 |   0.0018657 |   5.4895e-06 | leastsquares |        lasso |
+|   30 | Accept |    0.005722 |    0.054955 |   0.0018673 |   0.0018675 |       1.2334 | leastsquares |        ridge |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 15.8396 seconds
+Total objective function evaluation time: 2.1424
+
+Best observed feasible point:
+      Lambda        Learner       Regularization
+    __________    ____________    ______________
+    4.9743e-07    leastsquares        ridge     
+Observed objective function value = 0.0018673
+Estimated objective function value = 0.0018669
+Function evaluation time = 0.061834
+
+Best estimated feasible point (according to models):
+      Lambda        Learner       Regularization
+    __________    ____________    ______________
+    2.2135e-07    leastsquares        ridge     
+Estimated objective function value = 0.0018675
+Estimated function evaluation time = 0.068729
+
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|    1 | Best   |     0.41193 |     0.34988 |     0.41193 |     0.41193 |   0.00022222 |         none |     matern52 |     0.027364 |         true |
+|    2 | Accept |     0.50668 |     0.76695 |     0.41193 |      0.4157 |     0.079796 |         none |  exponential |    0.0074092 |        false |
+|    3 | Best   |   0.0018024 |      1.1105 |   0.0018024 |    0.020395 |     0.059652 | pureQuadrati | squaredexpon |      0.34999 |         true |
+|    4 | Best   |   0.0013677 |      0.3526 |   0.0013677 |    0.016352 |   0.00026605 |         none |  exponential |       3.3158 |        false |
+|    5 | Accept |   0.0014108 |     0.37652 |   0.0013677 |   0.0012641 |   0.00031114 |         none |  exponential |       2.2314 |        false |
+|    6 | Accept |     0.49917 |      2.4428 |   0.0013677 |   0.0013243 |       0.7651 |         none |     matern52 |     0.018158 |         true |
+|    7 | Accept |   0.0013924 |     0.68836 |   0.0013677 |   0.0012689 |   0.00011399 | pureQuadrati | squaredexpon |     0.046305 |         true |
+|    8 | Accept |   0.0014491 |     0.97529 |   0.0013677 |   0.0011775 |   0.00010528 | pureQuadrati | squaredexpon |    0.0053035 |         true |
+|    9 | Accept |      6.2641 |      1.3499 |   0.0013677 |    0.001423 |   0.00010574 | pureQuadrati | squaredexpon |       2.1539 |         true |
+|   10 | Best   |   0.0013664 |     0.28929 |   0.0013664 |  5.4575e-06 |    0.0014695 |         none |  exponential |       3.4462 |        false |
+|   11 | Accept |    0.018787 |     0.30914 |   0.0013664 |   0.0013917 |   0.00012171 |         none |     matern52 |      0.22561 |         true |
+|   12 | Accept |   0.0063936 |      0.5329 |   0.0013664 |   0.0013954 |   0.00010626 |         none |     matern52 |       2.5139 |         true |
+|   13 | Accept |   0.0014154 |     0.38213 |   0.0013664 |   0.0013948 |     0.014286 | pureQuadrati | squaredexpon |     0.022398 |         true |
+|   14 | Accept |   0.0018024 |     0.84103 |   0.0013664 | -0.00020858 |      0.73693 | pureQuadrati | squaredexpon |     0.045637 |         true |
+|   15 | Accept |      0.0219 |      0.3412 |   0.0013664 | -0.00023387 |    0.0047301 |         none |  exponential |      0.22388 |        false |
+|   16 | Accept |     0.25231 |     0.32882 |   0.0013664 |   0.0012468 |    0.0047536 |         none |  exponential |     0.050664 |        false |
+|   17 | Accept |    0.012225 |     0.25278 |   0.0013664 |  -0.0005729 |      0.73898 |         none |  exponential |      0.77971 |        false |
+|   18 | Best   |   0.0012625 |      0.3386 |   0.0012625 | -0.00048822 |     0.022953 |         none |     matern32 |       1.2905 |        false |
+|   19 | Accept |    0.056601 |     0.37887 |   0.0012625 |   0.0012976 |     0.023345 |         none |     matern32 |      0.13477 |        false |
+|   20 | Accept |   0.0032433 |     0.43853 |   0.0012625 | -0.00054755 |   0.00010265 |         none |     matern32 |      0.59845 |        false |
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|   21 | Accept |     0.50886 |      0.4756 |   0.0012625 | -0.00050427 |    0.0091472 |         none |     matern32 |    0.0064149 |        false |
+|   22 | Accept |   0.0043412 |     0.31913 |   0.0012625 | -0.00042471 |   0.00010626 |         none |     matern32 |       0.4955 |         true |
+|   23 | Accept |     0.25393 |      0.3056 |   0.0012625 |   0.0013187 |   0.00012687 |         none |     matern32 |     0.053087 |         true |
+|   24 | Accept |   0.0014595 |     0.25934 |   0.0012625 |   0.0013189 |    0.0087496 |         none |     matern32 |       3.4951 |         true |
+|   25 | Accept |    0.013489 |     0.34169 |   0.0012625 |   0.0013158 |     0.063249 |         none |     matern32 |      0.27764 |         true |
+|   26 | Accept |     0.51155 |     0.35877 |   0.0012625 |   0.0013196 |     0.081612 |         none |     matern32 |    0.0035204 |         true |
+|   27 | Accept |   0.0014724 |     0.29813 |   0.0012625 |   0.0012804 |     0.013957 |         none |  exponential |       1.8797 |         true |
+|   28 | Accept |     0.11319 |     0.29342 |   0.0012625 |     0.00128 |     0.014877 |         none |  exponential |     0.091957 |         true |
+|   29 | Accept |   0.0068902 |     0.30639 |   0.0012625 |   0.0012797 |   0.00010261 |         none |  exponential |      0.42367 |         true |
+|   30 | Accept |     0.50974 |     0.70293 |   0.0012625 |   0.0012803 |   0.00010247 |         none |  exponential |    0.0054358 |         true |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 62.4388 seconds
+Total objective function evaluation time: 16.5071
+
+Best observed feasible point:
+     Sigma      BasisFunction    KernelFunction    KernelScale    Standardize
+    ________    _____________    ______________    ___________    ___________
+    0.022953        none            matern32         1.2905          false   
+Observed objective function value = 0.0012625
+Estimated objective function value = 0.0012803
+Function evaluation time = 0.3386
+
+Best estimated feasible point (according to models):
+     Sigma      BasisFunction    KernelFunction    KernelScale    Standardize
+    ________    _____________    ______________    ___________    ___________
+    0.022953        none            matern32         1.2905          false   
+Estimated objective function value = 0.0012803
+Estimated function evaluation time = 0.33862
+
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|    1 | Best   |   0.0045121 |     0.26155 |   0.0045121 |   0.0045121 |    0.0021812 |     constant | squaredexpon |    0.0043977 |         true |
+|    2 | Best   |   0.0014636 |      7.3083 |   0.0014636 |   0.0020251 |   0.00019893 |     constant | ardexponenti |            - |        false |
+|    3 | Accept |   0.0018677 |      7.8628 |   0.0014636 |   0.0015495 |   0.00010815 |         none |  ardmatern32 |            - |        false |
+|    4 | Accept |   0.0062666 |      3.6035 |   0.0014636 |   0.0015513 |      0.41828 |         none |  ardmatern32 |            - |        false |
+|    5 | Accept |   0.0045438 |     0.22466 |   0.0014636 |   0.0014639 |     0.050826 |     constant | squaredexpon |    0.0038666 |         true |
+|    6 | Accept |     0.36795 |     0.45105 |   0.0014636 |   0.0014719 |      0.74239 |         none | squaredexpon |     0.047473 |         true |
+|    7 | Accept |   0.0062661 |      1.0346 |   0.0014636 |   0.0014703 |      0.72982 |     constant | rationalquad |      0.52554 |         true |
+|    8 | Accept |   0.0062661 |     0.52809 |   0.0014636 |   0.0014693 |       0.7607 |     constant | squaredexpon |        2.342 |        false |
+|    9 | Accept |   0.0062661 |      1.0429 |   0.0014636 |   0.0014686 |       0.7299 |     constant | rationalquad |      0.88872 |        false |
+|   10 | Accept |   0.0062661 |     0.59423 |   0.0014636 |   0.0014681 |      0.75967 |     constant |     matern52 |       1.0065 |         true |
+|   11 | Accept |   0.0062661 |     0.61945 |   0.0014636 |   0.0014677 |      0.64989 |     constant |     matern52 |       1.5704 |        false |
+|   12 | Accept |   0.0042762 |     0.31955 |   0.0014636 |   0.0014673 |      0.69742 |         none |     matern52 |       1.6171 |         true |
+|   13 | Accept |   0.0091278 |     0.32469 |   0.0014636 |   0.0014671 |      0.70087 |         none |     matern52 |      0.69151 |        false |
+|   14 | Accept |   0.0062673 |      2.6194 |   0.0014636 |   0.0014668 |      0.69906 |         none | rationalquad |      0.12958 |        false |
+|   15 | Accept |   0.0049618 |     0.24312 |   0.0014636 |   0.0014666 |      0.74309 |         none |     matern32 |       1.3357 |         true |
+|   16 | Accept |   0.0096524 |     0.24639 |   0.0014636 |   0.0014665 |      0.66915 |         none |     matern32 |       0.6729 |        false |
+|   17 | Accept |   0.0062661 |     0.58517 |   0.0014636 |   0.0014663 |      0.75406 |     constant |     matern32 |      0.28191 |         true |
+|   18 | Accept |   0.0062661 |     0.53513 |   0.0014636 |   0.0014662 |      0.69573 |     constant |     matern32 |       1.5147 |        false |
+|   19 | Accept |   0.0018236 |     0.60588 |   0.0014636 |    0.001466 |      0.73481 |       linear |     matern32 |       1.2156 |         true |
+|   20 | Accept |   0.0018236 |     0.54376 |   0.0014636 |   0.0014659 |      0.68141 |       linear |     matern32 |      0.10358 |        false |
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|   21 | Accept |   0.0018236 |       0.561 |   0.0014636 |   0.0014658 |      0.64573 |       linear |     matern52 |       3.4873 |         true |
+|   22 | Accept |   0.0018236 |     0.61267 |   0.0014636 |   0.0014657 |      0.66736 |       linear |     matern52 |       2.1522 |        false |
+|   23 | Accept |      0.1494 |     0.26439 |   0.0014636 |   0.0014663 |      0.74368 |         none |  exponential |      0.12542 |         true |
+|   24 | Accept |   0.0018169 |     0.83818 |   0.0014636 |   0.0014662 |      0.58938 | pureQuadrati |     matern32 |       0.8332 |        false |
+|   25 | Accept |   0.0015497 |     0.45371 |   0.0014636 |   0.0014661 |   0.00010194 | pureQuadrati |     matern32 |      0.21745 |         true |
+|   26 | Accept |    0.059721 |      1.6553 |   0.0014636 |   0.0014662 |    0.0013388 | pureQuadrati |     matern52 |       1.7079 |         true |
+|   27 | Best   |   0.0014082 |     0.48668 |   0.0014082 |   0.0014107 |   0.00010015 | pureQuadrati |  exponential |     0.048825 |         true |
+|   28 | Accept |   0.0015078 |      2.9028 |   0.0014082 |   0.0014106 |       0.0001 | pureQuadrati |  exponential |    0.0080385 |        false |
+|   29 | Accept |   0.0015277 |       11.83 |   0.0014082 |   0.0014105 |   0.00010739 | pureQuadrati | ardsquaredex |            - |         true |
+|   30 | Accept |   0.0062661 |     0.52629 |   0.0014082 |   0.0014105 |      0.69066 |     constant |  exponential |      0.78031 |        false |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 76.9564 seconds
+Total objective function evaluation time: 49.685
+
+Best observed feasible point:
+      Sigma       BasisFunction    KernelFunction    KernelScale    Standardize
+    __________    _____________    ______________    ___________    ___________
+    0.00010015    pureQuadratic     exponential       0.048825         true    
+Observed objective function value = 0.0014082
+Estimated objective function value = 0.0014105
+Function evaluation time = 0.48668
+
+Best estimated feasible point (according to models):
+      Sigma       BasisFunction    KernelFunction    KernelScale    Standardize
+    __________    _____________    ______________    ___________    ___________
+    0.00010015    pureQuadratic     exponential       0.048825         true    
+Estimated objective function value = 0.0014105
+Estimated function evaluation time = 0.48671
+
+Warning: Explicit basis matrix in the GPR model is not of full
+column rank - some basis coefficients are not identifiable. This
+could be because the predictor matrix X is rank deficient or has a
+constant predictor. 
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|    1 | Best   |   0.0061469 |     0.27088 |   0.0061469 |   0.0061469 |           13 |          132 |            1 |            2 |
+|    2 | Best   |   0.0053828 |      7.0122 |   0.0053828 |   0.0054213 |          463 |           99 |            2 |            3 |
+|    3 | Best   |   0.0042257 |      1.6342 |   0.0042257 |   0.0042259 |          106 |           85 |          289 |            8 |
+|    4 | Best   |   0.0017056 |      4.5726 |   0.0017056 |   0.0017058 |          241 |            1 |           14 |            7 |
+|    5 | Best   |    0.001229 |     0.20495 |    0.001229 |   0.0012292 |           10 |            3 |           88 |            8 |
+|    6 | Accept |   0.0013074 |     0.20891 |    0.001229 |   0.0012306 |           11 |            3 |          349 |            2 |
+|    7 | Accept |   0.0015324 |     0.18908 |    0.001229 |    0.001232 |           10 |           10 |          143 |            7 |
+|    8 | Accept |   0.0047223 |     0.18473 |    0.001229 |   0.0012277 |           10 |            3 |            1 |            2 |
+|    9 | Accept |   0.0013494 |     0.21671 |    0.001229 |   0.0012273 |           10 |            1 |          220 |            4 |
+|   10 | Accept |   0.0013559 |     0.22254 |    0.001229 |   0.0012276 |           11 |            1 |           66 |            5 |
+|   11 | Best   |   0.0012185 |     0.63102 |   0.0012185 |   0.0012176 |           38 |            3 |          152 |            5 |
+|   12 | Accept |   0.0013001 |      0.2668 |   0.0012185 |   0.0012212 |           12 |            3 |          146 |            8 |
+|   13 | Accept |   0.0014584 |     0.19884 |   0.0012185 |   0.0012198 |           10 |            4 |           58 |            1 |
+|   14 | Accept |    0.001356 |     0.19924 |   0.0012185 |   0.0012493 |           11 |            2 |          178 |            2 |
+|   15 | Accept |   0.0013832 |     0.21355 |   0.0012185 |   0.0012561 |           11 |            5 |          347 |            8 |
+|   16 | Best   |   0.0011683 |      2.1359 |   0.0011683 |   0.0011821 |          109 |            3 |          156 |            8 |
+|   17 | Accept |   0.0012047 |      9.3795 |   0.0011683 |   0.0012108 |          492 |            3 |          138 |            8 |
+|   18 | Accept |   0.0013103 |     0.22873 |   0.0011683 |   0.0012119 |           11 |            2 |          298 |            8 |
+|   19 | Accept |   0.0011773 |       6.343 |   0.0011683 |   0.0011713 |          304 |            3 |          138 |            8 |
+|   20 | Best   |   0.0011562 |      1.6943 |   0.0011562 |   0.0011564 |           87 |            1 |          357 |            5 |
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|   21 | Accept |   0.0011987 |      1.4471 |   0.0011562 |    0.001178 |           64 |            2 |           71 |            8 |
+|   22 | Accept |   0.0011677 |      6.9937 |   0.0011562 |   0.0011797 |          338 |            1 |          140 |            8 |
+|   23 | Accept |   0.0011979 |      6.7189 |   0.0011562 |   0.0011578 |          383 |            1 |          353 |            2 |
+|   24 | Accept |   0.0011865 |      5.0389 |   0.0011562 |   0.0011607 |          263 |            1 |          343 |            8 |
+|   25 | Accept |   0.0012195 |      1.7076 |   0.0011562 |   0.0011575 |           87 |            2 |          104 |            5 |
+|   26 | Accept |   0.0011884 |      7.9041 |   0.0011562 |   0.0011748 |          402 |            2 |          101 |            8 |
+|   27 | Accept |   0.0012278 |     0.80456 |   0.0011562 |   0.0011847 |           48 |            4 |           93 |            8 |
+|   28 | Accept |      0.0012 |      1.7874 |   0.0011562 |   0.0011823 |           91 |            2 |          348 |            7 |
+|   29 | Accept |   0.0012108 |      2.6034 |   0.0011562 |   0.0011586 |          129 |            1 |          332 |            8 |
+|   30 | Accept |   0.0011776 |      8.9739 |   0.0011562 |   0.0011601 |          457 |            2 |          323 |            8 |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 102.4766 seconds
+Total objective function evaluation time: 79.9871
+
+Best observed feasible point:
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           87                 1             357                  5          
+Observed objective function value = 0.0011562
+Estimated objective function value = 0.0012146
+Function evaluation time = 1.6943
+
+Best estimated feasible point (according to models):
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           492                3             138                  8          
+Estimated objective function value = 0.0011601
+Estimated function evaluation time = 9.4592
+
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|    1 | Best   |   0.0059119 |     0.47085 |   0.0059119 |   0.0059119 |           34 |          123 |          298 |            6 |
+|    2 | Best   |   0.0011951 |      3.7431 |   0.0011951 |   0.0019917 |          159 |            1 |          192 |            7 |
+|    3 | Accept |   0.0041736 |     0.48042 |   0.0011951 |   0.0015785 |           28 |           69 |           11 |            1 |
+|    4 | Accept |    0.003453 |      4.2324 |   0.0011951 |   0.0011955 |          254 |            1 |            2 |            4 |
+|    5 | Accept |   0.0063945 |      2.0573 |   0.0011951 |   0.0011956 |          143 |          167 |            2 |            3 |
+|    6 | Accept |   0.0027106 |     0.41339 |   0.0011951 |   0.0011955 |           23 |            1 |            4 |            8 |
+|    7 | Accept |   0.0012362 |     0.41757 |   0.0011951 |   0.0011955 |           20 |            2 |          352 |            8 |
+|    8 | Accept |   0.0013615 |     0.48213 |   0.0011951 |   0.0011958 |           25 |            9 |          357 |            7 |
+|    9 | Accept |   0.0034159 |     0.31058 |   0.0011951 |   0.0011958 |           18 |            9 |            2 |            8 |
+|   10 | Accept |    0.001603 |      0.2511 |   0.0011951 |   0.0011956 |           15 |            7 |          353 |            1 |
+|   11 | Accept |   0.0012758 |     0.19721 |   0.0011951 |   0.0011956 |           10 |            5 |           80 |            8 |
+|   12 | Accept |   0.0013103 |     0.20154 |   0.0011951 |   0.0011972 |           10 |            1 |          355 |            8 |
+|   13 | Accept |   0.0013515 |     0.19736 |   0.0011951 |    0.001255 |           10 |            2 |           99 |            8 |
+|   14 | Accept |   0.0012918 |     0.25578 |   0.0011951 |   0.0012493 |           13 |            5 |          210 |            8 |
+|   15 | Accept |   0.0012905 |     0.26437 |   0.0011951 |   0.0011999 |           13 |            1 |          174 |            8 |
+|   16 | Accept |   0.0014432 |      0.2744 |   0.0011951 |   0.0012468 |           10 |            9 |           88 |            8 |
+|   17 | Accept |   0.0012207 |      11.969 |   0.0011951 |   0.0012089 |          479 |            4 |          234 |            8 |
+|   18 | Accept |    0.001207 |     0.29947 |   0.0011951 |   0.0012039 |           11 |            3 |          272 |            5 |
+|   19 | Accept |   0.0014509 |     0.30396 |   0.0011951 |   0.0012179 |           11 |            1 |          341 |            4 |
+|   20 | Accept |   0.0012604 |     0.41104 |   0.0011951 |   0.0012186 |           15 |            6 |          107 |            5 |
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|   21 | Accept |   0.0012889 |      0.3423 |   0.0011951 |   0.0012321 |           12 |            4 |          209 |            6 |
+|   22 | Accept |   0.0013603 |     0.41724 |   0.0011951 |   0.0012362 |           11 |            2 |          254 |            8 |
+|   23 | Accept |    0.001304 |     0.46592 |   0.0011951 |   0.0012293 |           17 |            5 |          201 |            6 |
+|   24 | Accept |   0.0050161 |     0.28231 |   0.0011951 |   0.0012296 |           11 |           41 |            1 |            2 |
+|   25 | Accept |   0.0026032 |     0.24928 |   0.0011951 |   0.0012172 |           10 |            4 |            8 |            1 |
+|   26 | Accept |   0.0019168 |      0.2661 |   0.0011951 |   0.0012239 |           10 |            1 |           15 |            2 |
+|   27 | Accept |   0.0025652 |     0.26048 |   0.0011951 |   0.0012359 |           10 |           33 |          308 |            2 |
+|   28 | Accept |    0.001199 |     0.57531 |   0.0011951 |   0.0012345 |           14 |            1 |          146 |            8 |
+|   29 | Accept |   0.0012035 |     0.32074 |   0.0011951 |   0.0012243 |           11 |            1 |          111 |            8 |
+|   30 | Accept |   0.0013259 |     0.33815 |   0.0011951 |   0.0012344 |           11 |            1 |          114 |            8 |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 56.1424 seconds
+Total objective function evaluation time: 30.751
+
+Best observed feasible point:
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           159                1             192                  7          
+Observed objective function value = 0.0011951
+Estimated objective function value = 0.001273
+Function evaluation time = 3.7431
+
+Best estimated feasible point (according to models):
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           479                4             234                  8          
+Estimated objective function value = 0.0012344
+Estimated function evaluation time = 10.3114
+
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|    1 | Best   |   0.0023348 |    0.079146 |   0.0023348 |   0.0023348 |    4.347e-08 |          svm |        lasso |
+|    2 | Accept |   0.0065047 |    0.049767 |   0.0023348 |   0.0033631 |      0.84813 |          svm |        lasso |
+|    3 | Best   |   0.0017465 |    0.074492 |   0.0017465 |   0.0017493 |   2.7317e-07 | leastsquares |        lasso |
+|    4 | Accept |   0.0034921 |    0.054641 |   0.0017465 |   0.0017481 |      0.69485 | leastsquares |        ridge |
+|    5 | Best   |   0.0017251 |    0.058063 |   0.0017251 |   0.0017253 |   4.8943e-08 | leastsquares |        lasso |
+|    6 | Accept |   0.0062785 |    0.043954 |   0.0017251 |   0.0017252 |     0.079503 | leastsquares |        lasso |
+|    7 | Accept |   0.0017271 |    0.068651 |   0.0017251 |   0.0017251 |   5.6646e-06 | leastsquares |        ridge |
+|    8 | Accept |   0.0017271 |    0.078261 |   0.0017251 |   0.0017249 |   4.2021e-08 | leastsquares |        ridge |
+|    9 | Accept |   0.0017324 |    0.075386 |   0.0017251 |   0.0017249 |   2.8056e-08 |          svm |        ridge |
+|   10 | Best   |   0.0017202 |    0.079415 |   0.0017202 |   0.0017203 |   2.6861e-05 |          svm |        ridge |
+|   11 | Accept |   0.0024145 |    0.081056 |   0.0017202 |   0.0017203 |       0.4908 |          svm |        ridge |
+|   12 | Accept |   0.0017324 |    0.072767 |   0.0017202 |   0.0017205 |   8.0568e-07 |          svm |        ridge |
+|   13 | Accept |   0.0061836 |     0.04986 |   0.0017202 |   0.0017201 |       275.89 |          svm |        ridge |
+|   14 | Accept |   0.0017294 |    0.065537 |   0.0017202 |   0.0017204 |    0.0046551 |          svm |        ridge |
+|   15 | Accept |   0.0017271 |    0.054143 |   0.0017202 |   0.0017205 |   4.9321e-07 | leastsquares |        ridge |
+|   16 | Accept |    0.001728 |    0.049326 |   0.0017202 |   0.0017205 |   0.00026171 | leastsquares |        ridge |
+|   17 | Accept |   0.0017382 |    0.068771 |   0.0017202 |   0.0017211 |   0.00037151 |          svm |        ridge |
+|   18 | Accept |   0.0017271 |    0.053377 |   0.0017202 |   0.0017212 |    5.384e-05 | leastsquares |        ridge |
+|   19 | Accept |   0.0017308 |    0.079834 |   0.0017202 |   0.0017226 |   1.1995e-07 |          svm |        ridge |
+|   20 | Accept |   0.0017392 |    0.062748 |   0.0017202 |   0.0017287 |   9.9678e-08 | leastsquares |        lasso |
+|====================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |       Lambda |      Learner | Regularizati-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |
+|====================================================================================================================|
+|   21 | Accept |   0.0017353 |     0.06166 |   0.0017202 |   0.0017225 |   6.4375e-06 |          svm |        ridge |
+|   22 | Accept |   0.0017271 |    0.049528 |   0.0017202 |   0.0017263 |   1.3486e-07 | leastsquares |        ridge |
+|   23 | Accept |   0.0017271 |    0.061796 |   0.0017202 |   0.0017268 |   2.8428e-08 | leastsquares |        ridge |
+|   24 | Accept |   0.0017272 |    0.060391 |   0.0017202 |   0.0017233 |   9.7187e-05 | leastsquares |        ridge |
+|   25 | Accept |   0.0017469 |    0.058391 |   0.0017202 |   0.0017233 |   2.7902e-08 | leastsquares |        lasso |
+|   26 | Accept |   0.0017271 |     0.05542 |   0.0017202 |   0.0017233 |   1.5484e-06 | leastsquares |        ridge |
+|   27 | Accept |   0.0017339 |    0.068945 |   0.0017202 |   0.0017233 |   5.1725e-05 |          svm |        ridge |
+|   28 | Accept |   0.0017272 |    0.053135 |   0.0017202 |   0.0017245 |   9.8773e-05 | leastsquares |        ridge |
+|   29 | Accept |   0.0017288 |     0.06757 |   0.0017202 |   0.0017245 |    0.0020678 |          svm |        ridge |
+|   30 | Accept |   0.0017271 |     0.05793 |   0.0017202 |   0.0017244 |   1.8249e-05 | leastsquares |        ridge |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 16.1541 seconds
+Total objective function evaluation time: 1.894
+
+Best observed feasible point:
+      Lambda      Learner    Regularization
+    __________    _______    ______________
+    2.6861e-05      svm          ridge     
+Observed objective function value = 0.0017202
+Estimated objective function value = 0.0017278
+Function evaluation time = 0.079415
+
+Best estimated feasible point (according to models):
+      Lambda        Learner       Regularization
+    __________    ____________    ______________
+    9.7187e-05    leastsquares        ridge     
+Estimated objective function value = 0.0017244
+Estimated function evaluation time = 0.056134
+
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|    1 | Best   |   0.0010535 |      1.2618 |   0.0010535 |   0.0010535 |    0.0042089 |     constant | ardexponenti |            - |         true |
+|    2 | Accept |   0.0014336 |      1.0402 |   0.0010535 |   0.0010892 |     0.037071 |         none | rationalquad |     0.013414 |        false |
+|    3 | Accept |   0.0021501 |      0.6019 |   0.0010535 |   0.0012867 |      0.13733 |       linear |  exponential |      0.59594 |         true |
+|    4 | Accept |   0.0010922 |       3.567 |   0.0010535 |   0.0012423 |   0.00011603 |     constant | ardrationalq |            - |        false |
+|    5 | Best   |   0.0010531 |      1.4178 |   0.0010531 |   0.0010533 |    0.0042578 |     constant | ardexponenti |            - |         true |
+|    6 | Accept |   0.0010698 |      1.4619 |   0.0010531 |   0.0010533 |   0.00010004 |     constant | ardexponenti |            - |        false |
+|    7 | Accept |   0.0030861 |      2.1979 |   0.0010531 |   0.0010533 |   0.00010456 |     constant |  ardmatern32 |            - |         true |
+|    8 | Accept |    0.001241 |     0.92352 |   0.0010531 |   0.0010533 |     0.035114 |         none | rationalquad |       3.7566 |        false |
+|    9 | Accept |   0.0010582 |      1.4084 |   0.0010531 |   0.0010533 |    0.0034111 |         none | ardexponenti |            - |         true |
+|   10 | Best   |   0.0010261 |      1.3581 |   0.0010261 |   0.0010262 |    0.0078621 |         none | ardexponenti |            - |        false |
+|   11 | Best   |  0.00095014 |      1.2258 |  0.00095014 |  0.00095018 |    0.0079211 |       linear | ardexponenti |            - |        false |
+|   12 | Best   |  0.00094856 |      1.2225 |  0.00094856 |   0.0009486 |    0.0080599 |       linear | ardexponenti |            - |         true |
+|   13 | Accept |   0.0012721 |      2.2539 |  0.00094856 |   0.0009486 |    0.0080342 |       linear |  ardmatern32 |            - |         true |
+|   14 | Accept |   0.0021501 |      1.3267 |  0.00094856 |   0.0009486 |      0.76782 |       linear |  ardmatern32 |            - |        false |
+|   15 | Accept |  0.00096385 |      1.2684 |  0.00094856 |   0.0009486 |    0.0079125 | pureQuadrati | ardexponenti |            - |         true |
+|   16 | Accept |   0.0021501 |     0.51922 |  0.00094856 |   0.0009486 |      0.13809 |       linear |  exponential |      0.31357 |         true |
+|   17 | Accept |  0.00096111 |      1.4132 |  0.00094856 |   0.0009486 |    0.0081644 | pureQuadrati | ardexponenti |            - |        false |
+|   18 | Accept |   0.0019753 |      1.2447 |  0.00094856 |   0.0009486 |      0.76984 | pureQuadrati |  ardmatern32 |            - |         true |
+|   19 | Accept |   0.0010816 |      1.2886 |  0.00094856 |   0.0009486 |     0.025663 |       linear | rationalquad |       4.8651 |        false |
+|   20 | Accept |   0.0012849 |     0.27945 |  0.00094856 |   0.0009486 |     0.019274 |       linear |     matern52 |       4.8215 |        false |
+|==================================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   |        Sigma | BasisFunction| KernelFuncti-|  KernelScale |  Standardize |
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    |              |              | on           |              |              |
+|==================================================================================================================================================|
+|   21 | Accept |   0.0078904 |     0.75904 |  0.00094856 |  0.00094863 |    0.0063455 |         none |     matern52 |       4.8711 |        false |
+|   22 | Accept |   0.0039281 |     0.41569 |  0.00094856 |  0.00094864 |     0.011482 | pureQuadrati |     matern52 |       4.6395 |        false |
+|   23 | Accept |     0.00129 |     0.25596 |  0.00094856 |  0.00094864 |     0.019116 |       linear |     matern52 |        4.758 |         true |
+|   24 | Accept |    0.001058 |      2.9027 |  0.00094856 |  0.00094864 |     0.012527 |       linear | rationalquad |       4.6415 |         true |
+|   25 | Accept |    0.001186 |     0.23096 |  0.00094856 |  0.00094863 |     0.032205 |       linear |     matern32 |       4.5048 |         true |
+|   26 | Accept |   0.0011989 |     0.36085 |  0.00094856 |  0.00094863 |     0.022979 |       linear |     matern32 |       4.5288 |        false |
+|   27 | Accept |   0.0017816 |     0.42847 |  0.00094856 |  0.00094863 |     0.070144 | pureQuadrati |     matern32 |       2.5453 |         true |
+|   28 | Accept |    0.001183 |     0.26228 |  0.00094856 |  0.00094863 |     0.037599 |         none |     matern32 |       4.5296 |         true |
+|   29 | Accept |   0.0010551 |     0.25121 |  0.00094856 |  0.00094863 |     0.036904 |         none |  exponential |       4.7402 |         true |
+|   30 | Accept |   0.0011232 |     0.23303 |  0.00094856 |  0.00094863 |     0.060419 |         none |  exponential |       4.2325 |        false |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 59.7815 seconds
+Total objective function evaluation time: 33.3813
+
+Best observed feasible point:
+      Sigma      BasisFunction    KernelFunction    KernelScale    Standardize
+    _________    _____________    ______________    ___________    ___________
+    0.0080599       linear        ardexponential        NaN           true    
+Observed objective function value = 0.00094856
+Estimated objective function value = 0.00094863
+Function evaluation time = 1.2225
+
+Best estimated feasible point (according to models):
+      Sigma      BasisFunction    KernelFunction    KernelScale    Standardize
+    _________    _____________    ______________    ___________    ___________
+    0.0080599       linear        ardexponential        NaN           true    
+Estimated objective function value = 0.00094863
+Estimated function evaluation time = 1.2169
+
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|    1 | Best   |   0.0040487 |      2.7675 |   0.0040487 |   0.0040487 |          197 |           75 |            3 |            1 |
+|    2 | Best   |   0.0015203 |     0.33675 |   0.0015203 |   0.0027815 |           20 |            5 |           31 |            1 |
+|    3 | Best   |   0.0013418 |      2.3604 |   0.0013418 |   0.0013421 |          153 |            2 |           22 |            3 |
+|    4 | Accept |   0.0037048 |     0.31061 |   0.0013418 |   0.0013419 |           17 |           32 |            2 |            2 |
+|    5 | Accept |   0.0015672 |     0.22836 |   0.0013418 |   0.0013417 |           10 |            1 |          235 |            1 |
+|    6 | Accept |   0.0014424 |     0.18637 |   0.0013418 |   0.0013419 |           10 |            3 |          148 |            1 |
+|    7 | Best   |   0.0012716 |     0.19849 |   0.0012716 |   0.0012716 |           11 |            1 |           37 |            2 |
+|    8 | Accept |    0.001704 |     0.17716 |   0.0012716 |   0.0012721 |           10 |            1 |           15 |            3 |
+|    9 | Best   |    0.001258 |     0.19733 |    0.001258 |   0.0012576 |           11 |            2 |           52 |            2 |
+|   10 | Accept |    0.001342 |      8.0861 |    0.001258 |   0.0012571 |          494 |            1 |           68 |            1 |
+|   11 | Accept |   0.0041941 |      0.1807 |    0.001258 |   0.0013259 |           10 |           84 |          323 |            2 |
+|   12 | Accept |   0.0018697 |     0.17842 |    0.001258 |   0.0012392 |           10 |            2 |           15 |            2 |
+|   13 | Accept |   0.0013156 |      0.1836 |    0.001258 |   0.0012598 |           10 |            2 |           63 |            2 |
+|   14 | Accept |   0.0047179 |     0.19092 |    0.001258 |   0.0012607 |           11 |            1 |            1 |            3 |
+|   15 | Best   |   0.0011699 |     0.27784 |   0.0011699 |   0.0011706 |           16 |            3 |          342 |            3 |
+|   16 | Accept |   0.0012357 |     0.27311 |   0.0011699 |   0.0011698 |           16 |            6 |          355 |            3 |
+|   17 | Accept |   0.0013523 |     0.23664 |   0.0011699 |     0.00117 |           11 |            7 |           85 |            3 |
+|   18 | Best   |   0.0011119 |      8.9659 |   0.0011119 |   0.0011088 |          499 |            2 |           43 |            3 |
+|   19 | Accept |   0.0012209 |      0.2054 |   0.0011119 |     0.00111 |           11 |            1 |           50 |            3 |
+|   20 | Accept |   0.0011602 |     0.43449 |   0.0011119 |   0.0011095 |           25 |            3 |           45 |            3 |
+|===================================================================================================================================|
+| Iter | Eval   | Objective:  | Objective   | BestSoFar   | BestSoFar   | NumLearningC-|  MinLeafSize | MaxNumSplits | NumVariables-|
+|      | result | log(1+loss) | runtime     | (observed)  | (estim.)    | ycles        |              |              | ToSample     |
+|===================================================================================================================================|
+|   21 | Accept |   0.0014349 |     0.28717 |   0.0011119 |    0.001109 |           17 |            3 |          358 |            1 |
+|   22 | Accept |   0.0011917 |     0.34643 |   0.0011119 |   0.0011086 |           20 |            4 |          262 |            3 |
+|   23 | Best   |   0.0010928 |      6.2129 |   0.0010928 |   0.0010999 |          317 |            3 |          351 |            3 |
+|   24 | Accept |   0.0011616 |      0.4569 |   0.0010928 |    0.001097 |           23 |            1 |          346 |            3 |
+|   25 | Best   |   0.0010882 |      7.2823 |   0.0010882 |   0.0010907 |          397 |            2 |          342 |            3 |
+|   26 | Accept |   0.0010981 |      8.2894 |   0.0010882 |   0.0010882 |          473 |            2 |          354 |            3 |
+|   27 | Accept |   0.0011062 |      8.7131 |   0.0010882 |   0.0010901 |          487 |            3 |          358 |            3 |
+|   28 | Accept |    0.001105 |      8.5819 |   0.0010882 |   0.0010901 |          491 |            3 |           50 |            3 |
+|   29 | Accept |   0.0010898 |      8.9377 |   0.0010882 |   0.0010881 |          495 |            2 |          358 |            3 |
+|   30 | Accept |   0.0010999 |       8.094 |   0.0010882 |   0.0010901 |          462 |            2 |          353 |            3 |
+
+__________________________________________________________
+Optimization completed.
+MaxObjectiveEvaluations of 30 reached.
+Total function evaluations: 30
+Total elapsed time: 105.473 seconds
+Total objective function evaluation time: 83.1779
+
+Best observed feasible point:
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           397                2             342                  3          
+Observed objective function value = 0.0010882
+Estimated objective function value = 0.0011013
+Function evaluation time = 7.2823
+
+Best estimated feasible point (according to models):
+    NumLearningCycles    MinLeafSize    MaxNumSplits    NumVariablesToSample
+    _________________    ___________    ____________    ____________________
+           495                2             358                  3          
+Estimated objective function value = 0.0010901
+Estimated function evaluation time = 8.7097
+
+>> 

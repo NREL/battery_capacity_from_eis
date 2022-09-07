@@ -67,7 +67,7 @@ legend(...
     "Linear, Test", "GPR, Test", "RF, Test", ...
     'Location', 'northoutside',...
     'NumColumns', 2)
-set(gca, 'XScale', 'log'); ylim([0 0.13])
+set(gca, 'XScale', 'log'); ylim([0 Inf])
 xlabel('Frequency (Hz)');
 ylabel('MAE')
 
@@ -100,7 +100,8 @@ cb = colorbar(); cb.Label.String = "MAE_{Test}";
 set(gca, 'XScale', 'log', 'Yscale', 'log')
 hold on; box on; grid on;
 [~, idxBest] = min(maeTestLinear);
-fx = freq(idxFreq(idxBest,1)); fy = freq(idxFreq(idxBest,2));
+idxBest = idxFreq(idxBest,:);
+fx = freq(idxBest(1)); fy = freq(idxBest(2));
 plot(fx, fy, 'ok', 'MarkerFaceColor', 'r', 'MarkerSize', 10)
 plot([fx,fx],[min(freq),max(freq)], '-r')
 plot([min(freq),max(freq)],[fy,fy], '-r')
@@ -126,7 +127,8 @@ cb = colorbar(); cb.Label.String = "MAE_{Test}";
 set(gca, 'XScale', 'log', 'Yscale', 'log')
 hold on; box on; grid on;
 [~, idxBest] = min(maeTestGpr);
-fx = freq(idxFreq(idxBest,1)); fy = freq(idxFreq(idxBest,2));
+idxBest = idxFreq(idxBest,:);
+fx = freq(idxBest(1)); fy = freq(idxBest(2));
 plot(fx, fy, 'ok', 'MarkerFaceColor', 'r', 'MarkerSize', 10)
 plot([fx,fx],[min(freq),max(freq)], '-r')
 plot([min(freq),max(freq)],[fy,fy], '-r')
@@ -152,7 +154,8 @@ cb = colorbar(); cb.Label.String = "MAE_{Test}";
 set(gca, 'XScale', 'log', 'Yscale', 'log')
 hold on; box on; grid on;
 [~, idxBest] = min(maeTestRF);
-fx = freq(idxFreq(idxBest,1)); fy = freq(idxFreq(idxBest,2));
+idxBest = idxFreq(idxBest,:);
+fx = freq(idxBest(1)); fy = freq(idxBest(2));
 plot(fx, fy, 'ok', 'MarkerFaceColor', 'r', 'MarkerSize', 10)
 plot([fx,fx],[min(freq),max(freq)], '-r')
 plot([min(freq),max(freq)],[fy,fy], '-r')
@@ -173,13 +176,9 @@ plotMaeHeatmap(Pipes_GPR, "GPR");
 plotMaeHeatmap(Pipes_RF, "RF");
 
 %% Z vs q correlation plot with vertical lines for selected features from single freq, double freq, fscorr, fssisso
-% need raw data and frequency vector for plotting
-load('data\Data_Denso2021.mat', 'Data')
-freq = Data.Freq(1,:);
 load('data\Data_Denso2021.mat', 'DataFormatted', 'Data2Formatted')
 Data = combineDataTables(DataFormatted, Data2Formatted);
 clearvars DataFormatted Data2Formatted
-
 % Load full data files with models and all for this plot
 load('results\pipes_gpr.mat', 'Pipes_GPR');
 load('results\pipes_linear.mat', 'Pipes_Linear')
@@ -197,7 +196,7 @@ clearvars Data Pipes_Linear Pipes_GPR Pipes_RF
 load('results\pipes_gpr_noModels.mat', 'Pipes_GPR');
 load('results\pipes_linear_noModels.mat', 'Pipes_Linear')
 load('results\pipes_rf_noModels.mat', 'Pipes_RF')
-%%
+
 [maeTrain_linear, maeCV_linear, maeTest_linear] = unwrapMAEs(Pipes_Linear);
 [maeTrain_gpr, maeCV_gpr, maeTest_gpr] = unwrapMAEs(Pipes_GPR);
 [maeTrain_rf, maeCV_rf, maeTest_rf] = unwrapMAEs(Pipes_RF);
@@ -306,6 +305,7 @@ annotation(gcf,'textbox',...
 exportgraphics(gcf, 'figures/mae_histogram2_allmodels.tif', 'Resolution', 600);
 exportgraphics(gcf, 'figures/mae_histogram2_allmodels.eps', 'Resolution', 600);
 
+
 %% Show predictions, partial dependence of best three models
 %{
 Report detailed results of the best models found during the model
@@ -313,6 +313,9 @@ optimization process (pipeline search and hyperparameter optimization).
 %}
 % clean up
 clear; clc; close all;
+% freq vector
+load('data\Data_Denso2021.mat', 'Data')
+freq = Data.Freq(1,:); clearvars Data
 
 % Load data
 load('data\Data_Denso2021.mat', 'DataFormatted', 'Data2Formatted')
@@ -337,66 +340,132 @@ seriesIdxCV = seriesIdx(~maskTest);
 % Define a cross-validation scheme.
 cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
 
-% Linear_1C (double freq) (best) (hyperparameter optimized) model
+% Linear_1A (all freq) (hyperparameter optimized) model
 seq = {...
     @RegressionPipeline.normalizeZScore,...
-    @selectFrequency...
     };
-hyp = {{}, {"idxFreq", [28,29]}};
 Model_Linear = RegressionPipeline(@fitrlinear,...
     "FeatureTransformationSequence", seq,...
-    "FeatureTransformationFixedHyp", hyp,...
-    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
+    "ModelFuncOpts", {'Lambda', 0.00015343, 'Learner', 'svm', 'Regularization', 'ridge'});
 [Model_Linear, PredTrain_Linear, ~, PredCV_Linear] = crossvalidate(Model_Linear, data.Xcv, data.Ycv, cvsplit, seriesIdxCV);
 PredTest_Linear = predict(Model_Linear, data.Xtest, data.Ytest, seriesIdxTest);
 % Plot predictions
-plot_parity_all(PredTrain_Linear, PredCV_Linear, PredTest_Linear, "Linear_1C_HypOpt")
-plot_1D_PDP(PredTrain_Linear, "Linear_1C_HypOpt")
-% % % plot_2D_PDP(Model_Linear, PredTrain_Linear, [1,3], "Linear_1C_HypOpt")
+plot_parity_all(PredTrain_Linear, PredCV_Linear, PredTest_Linear, "Linear_1A_HypOpt")
 
-% GPR_1E (SISSO) model
-seq = {...
-    @RegressionPipeline.normalizeZScore,...
-    @fssisso...
-    };
-hyp = {{}, {...
-    "y", [],...
-    "nNonzeroCoeffs", 4,...
-    "nFeaturesPerSisIter", 15}};
-Model_GPR = RegressionPipeline(@fitrgp,...
-    "FeatureTransformationSequence", seq,...
-    "FeatureTransformationFixedHyp", hyp,...
-    "ModelFuncOpts", {'OptimizeHyperparameters', 'all'});
-[Model_GPR, PredTrain_GPR, ~, PredCV_GPR] = crossvalidate(Model_GPR, data.Xcv, data.Ycv, cvsplit, seriesIdxCV);
-PredTest_GPR = predict(Model_GPR, data.Xtest, data.Ytest, seriesIdxTest);
-% Plot predictions
-plot_parity_all(PredTrain_GPR, PredCV_GPR, PredTest_GPR, "GPR_1E")
-plot_1D_PDP(PredTrain_GPR, "GPR_1E")
-% % % plot_2D_PDP(Model_GPR, PredTrain_GPR, [1,3], "GPR_1E")
+% For linear model, plot beta directly instead of partial dependence
+% Plot versus correlation to aid interpretation
+% indices for correlation
+w = size(X,2)/4;
+idxZreal = 1:w;
+idxZimag = (w+1):(w*2);
+idxZmag = (w*2+1):(w*3);
+idxZphz = (w*3+1):(w*4);
+% Beta values
+beta = Model_Linear.Model.Beta .* 10^2;
+beta_zreal = beta(1:69);
+beta_zimag = beta((69+1):(69*2));
+beta_zmag  = beta((69*2 + 1):(69*3));
+beta_zphz  = beta((69*3 + 1):end);
+% Plot
+figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
+ax1 = nexttile; hold on; box on; grid on; colororder({'k','b'});
+title('Z_{Real}', 'FontWeight', 'normal');
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+plot(freq, beta_zreal, '-k', 'LineWidth', 1.5);
+set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
+xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('\beta\cdot10^2' , 'FontSize', 10);
+yyaxis right; 
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZreal}), '-b', 'LineWidth', 1);
+ylim([-1 1]);
+ax2 = nexttile; hold on; box on; grid on;  colororder({'k','b'});
+title('Z_{Imaginary}', 'FontWeight', 'normal');
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+plot(freq, beta_zimag, '-k', 'LineWidth', 1.5);
+set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
+xlabel('Frequency (Hz)', 'FontSize', 10);
+yyaxis right; 
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZimag}), '-b', 'LineWidth', 1);
+ylim([-1 1]);
+ax3 = nexttile; hold on; box on; grid on;  colororder({'k','b'});
+title('|Z|', 'FontWeight', 'normal');
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+plot(freq, beta_zmag, '-k', 'LineWidth', 1.5);
+set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
+xlabel('Frequency (Hz)', 'FontSize', 10);
+yyaxis right; 
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZmag}), '-b', 'LineWidth', 1);
+ylim([-1 1]);
+ax4 = nexttile; hold on; box on; grid on;  colororder({'k','b'});
+title('\angleZ', 'FontWeight', 'normal');
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+plot(freq, beta_zphz, '-k', 'LineWidth', 1.5);
+set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
+xlabel('Frequency (Hz)', 'FontSize', 10);
+yyaxis right; 
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZphz}), '-b', 'LineWidth', 1);
+ylim([-1 1]);
+ylabel({'Correlation to rel.','discharge capacity'})
 
-% RF_1C (double freq) (2nd best) (hyperparameter optimized) model
+set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,1.9])
+
+exportgraphics(gcf, 'figures/model_linear_best_beta.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/model_linear_best_beta.eps', 'Resolution', 600)
+
+% Plot 2D partial dependence of the most important magnitude and most
+% important phase feature
+% % % [a, idx] = sort(abs(beta), 'descend'); % [5, 220]
+plot_2D_PDP(Model_Linear, PredTrain_Linear, [5,220], "Linear_1A_HypOpt")
+
+% GPR_1C (best) model
 seq = {...
     @RegressionPipeline.normalizeZScore,...
     @selectFrequency...
     };
-hyp = {{}, {"idxFreq", [26,37]}};
+hyp = {{}, {"idxFreq", [27,32]}};
+Model_GPR = RegressionPipeline(@fitrgp,...
+    "FeatureTransformationSequence", seq,...
+    "FeatureTransformationFixedHyp", hyp);
+[Model_GPR, PredTrain_GPR, ~, PredCV_GPR] = crossvalidate(Model_GPR, data.Xcv, data.Ycv, cvsplit, seriesIdxCV);
+PredTest_GPR = predict(Model_GPR, data.Xtest, data.Ytest, seriesIdxTest);
+
+% Plot predictions
+plot_parity_all(PredTrain_GPR, PredCV_GPR, PredTest_GPR, "GPR_1E")
+plot_1D_PDP(Model_GPR, "GPR_1E")
+plot_2D_PDP(Model_GPR, PredTrain_GPR, [2,7], "GPR_1E")
+
+% RF_1C (double freq) (best) (hyperparameter optimized) (weighted) model
+weights = evenlyWeightDataSeries(seriesIdxCV);
+seq = {...
+    @RegressionPipeline.normalizeZScore,...
+    @selectFrequency...
+    };
+hyp = {{}, {"idxFreq", [19,43]}};
 Model_RF = RegressionPipeline(@fitrensemble,...
     "FeatureTransformationSequence", seq,...
     "FeatureTransformationFixedHyp", hyp,...
-    "ModelFuncOpts", {'Method','Bag',...
-                      'OptimizeHyperparameters',...
-                            {'NumLearningCycles',...
-                             'MinLeafSize',...
-                             'MaxNumSplits',...
-                             'NumVariablesToSample'}...
-                             }...
-                         );
+    "ModelFuncOpts", {...
+        'Weights', weights, ...
+        'Method','Bag',...
+        'OptimizeHyperparameters',...
+            {'NumLearningCycles',...
+             'MinLeafSize',...
+             'MaxNumSplits',...
+             'NumVariablesToSample'}...
+             });
 [Model_RF, PredTrain_RF, ~, PredCV_RF] = crossvalidate(Model_RF, data.Xcv, data.Ycv, cvsplit, seriesIdxCV);
 PredTest_RF = predict(Model_RF, data.Xtest, data.Ytest, seriesIdxTest);
 % Plot predictions
-plot_parity_all(PredTrain_RF, PredCV_RF, PredTest_RF, "RF_1C_HypOpt")
-plot_1D_PDP(PredTrain_RF, "RF_1C_HypOpt")
-% % % plot_2D_PDP(Model_RF, PredTrain_RF, [1,3], "RF_1C_HypOpt")
+plot_parity_all(PredTrain_RF, PredCV_RF, PredTest_RF, "RF_1C_HypOpt_Weighted")
+plot_1D_PDP(Model_RF, "RF_1C_HypOpt_Weighted")
+plot_2D_PDP(Model_RF, PredTrain_RF, [2,5], "RF_1C_HypOpt_Weighted")
+
+save('results\top_3_models.mat');
+
+%% Plot distribution of predictions from top 3 models
+plot_pred_pdfs(Data(maskTest,:),...
+    [PredTest_Linear, PredTest_GPR, PredTest_RF],...
+    'split', {'-10 \circC', '0 \circC, 10 \circC', '25 \circC'},... 
+    {'Linear', 'GPR', 'RF'}, colortriplet, "best_models_predTest_pdfs")
 
 % Split data by temp, but group middle temps
 Data.split(Data.TdegC_EIS == -10) = 1;
@@ -412,18 +481,131 @@ colors3 = colors3(end-1:end,:);
 colortriplet = [colors1(3,:); colors2(12,:); colors3(2,:)];
 clearvars colors1 colors2 colors3
 
-% Plot distributions of predictions
-plot_pred_pdfs(Data,...
-    [PredTest_Linear, PredTest_GPR, PredTest_RF],...
-    'split', {'-10 \circC', '0 \circC, 10 \circC', '25 \circC'},... 
-    {'Linear (best)', 'GPR (best)', 'RF (best'}, colortriplet, "best_models_predTest_pdfs")
+%% Plot predictions from 1 cell from best GPR model with confidence
+% parity plot, color points by EIS temperature
+seriesTest = unique(seriesIdxTest);
+% seriesTest = seriesTest(1);
 
-save('results\bestModels.mat');
+%{
+SOMETHING IS WRONG HERE
+first two series are the same (?)
+no series goes below 90% capacity which isn't true
+%}
 
-%% Plot distribution of predictions from top 3 models
+colorsT = viridis(4);
+tempsC = [-10, 0, 10, 25];
+% for thisSeries = seriesTest' % 3rd test series looks the nicest
+for thisSeries = seriesTest(3) 
+    figure; hold on; box on; grid on;
+    maskSeries = Data.seriesIdx == thisSeries;
+    tempC_series = Data.TdegC_EIS(maskSeries);
+    maskSeries = PredTest_GPR.seriesIdx == thisSeries;
+    YSeries = PredTest_GPR.Y{maskSeries,:};
+    YPredSeries = PredTest_GPR.YPred{maskSeries,1};
+    YPredCISeries = PredTest_GPR.YPred{maskSeries,[3,4]};
+    go = gobjects(4, 1);
+    for iTemp = 1:length(tempsC)
+        thisTemp = tempsC(iTemp);
+        maskTemp = tempC_series == thisTemp;
+        go(iTemp) = errorbar(YSeries(maskTemp), YPredSeries(maskTemp), ...
+            abs(YPredSeries(maskTemp)-YPredCISeries(maskTemp,1)),...
+            abs(YPredSeries(maskTemp)-YPredCISeries(maskTemp,2)),...
+            '.', 'MarkerSize', 20, 'Color', colorsT(iTemp,:), 'LineWidth', 1);
+    end
+    axis([0.65 1.1 0.65 1.1])
+    axlims = axis;
+    maxlim = max(abs(axlims));
+    plot([-maxlim, maxlim], [-maxlim, maxlim], '--k', 'LineWidth', 1.5)
+    axis(axlims);
+    legend(go, {'-10 \circC', '0 \circC', '10 \circC', '25 \circC'}, 'Location', 'northoutside', 'NumColumns', 2)
+    
+    xlabel('Actual rel. discharge capacity')
+    ylabel('Predicted rel. capacity')
+    
+    set(gcf, 'Units', 'inches', 'Position', [2, 2, 3.25, 3])
+end
 
+exportgraphics(gcf, 'figures/model_gpr_best_predTestCI.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/model_gpr_best_predTestCI.eps', 'Resolution', 600)
 
+%% Performance of ensemble model of the best 3 models
+YPred_Train_Ensemble = mean([PredTrain_Linear.YPred{:,1},...
+    PredTrain_GPR.YPred{:,1},...
+    PredTrain_RF.YPred{:,1}], 2);
+YPred_CV_Ensemble = mean([PredCV_Linear.YPred{:,1},...
+    PredCV_GPR.YPred{:,1},...
+    PredCV_RF.YPred{:,1}], 2);
+YPred_Test_Ensemble = mean([PredTest_Linear.YPred{:,1},...
+    PredTest_GPR.YPred{:,1},...
+    PredTest_RF.YPred{:,1}], 2);
+% Create Prediction objects to do all the hard stuff for us
+PredTrain_Ensemble = Prediction(X(~maskTest,:), YPred_Train_Ensemble, Y(~maskTest,:), seriesIdxCV);
+PredCV_Ensemble = Prediction(X(~maskTest,:), YPred_CV_Ensemble, Y(~maskTest,:), seriesIdxCV);
+PredTest_Ensemble = Prediction(X(maskTest,:), YPred_Test_Ensemble, Y(maskTest,:), seriesIdxTest);
 
+% Plot predictions
+plot_parity_all(PredTrain_Ensemble, PredCV_Ensemble, PredTest_Ensemble, "Ensemble")
+
+%% Plot of MAE (yyaxis left) and maxE (yyaxis right) for best 3 models and ensemble
+maeTrain = [...
+    PredTrain_Linear.FitStats.mae, ...
+    PredTrain_GPR.FitStats.mae, ...
+    PredTrain_RF.FitStats.mae, ...
+    PredTrain_Ensemble.FitStats.mae...
+    ];
+maeCV = [...
+    PredCV_Linear.FitStats.mae, ...
+    PredCV_GPR.FitStats.mae, ...
+    PredCV_RF.FitStats.mae, ...
+    PredCV_Ensemble.FitStats.mae...
+    ];
+maeTest = [...
+    PredTest_Linear.FitStats.mae, ...
+    PredTest_GPR.FitStats.mae, ...
+    PredTest_RF.FitStats.mae, ...
+    PredTest_Ensemble.FitStats.mae...
+    ];
+maxaeTrain = [...
+    PredTrain_Linear.FitStats.maxae, ...
+    PredTrain_GPR.FitStats.maxae, ...
+    PredTrain_RF.FitStats.maxae, ...
+    PredTrain_Ensemble.FitStats.maxae...
+    ];
+maxaeCV = [...
+    PredCV_Linear.FitStats.maxae, ...
+    PredCV_GPR.FitStats.maxae, ...
+    PredCV_RF.FitStats.maxae, ...
+    PredCV_Ensemble.FitStats.maxae...
+    ];
+maxaeTest = [...
+    PredTest_Linear.FitStats.maxae, ...
+    PredTest_GPR.FitStats.maxae, ...
+    PredTest_RF.FitStats.maxae, ...
+    PredTest_Ensemble.FitStats.maxae...
+    ];
+
+figure; tiledlayout('flow','TileSpacing','compact','Padding','compact');
+xstrs = categorical(["Linear","GPR","RF","Ensemble"]);
+nexttile; hold on; box on; grid on; colororder({'k','k'})
+ms = 8; lw = 1.5;
+plot(xstrs, maeTrain, 'o', 'Color', colortriplet(1,:), 'MarkerSize', ms, 'LineWidth', lw)
+plot(xstrs, maeCV, 's', 'Color', colortriplet(2,:), 'MarkerSize', ms, 'LineWidth', lw)
+plot(xstrs, maeTest, 'd', 'Color', colortriplet(3,:), 'MarkerSize', ms, 'LineWidth', lw)
+lgd = legend('Train','Cross-validation','Test');
+lgd.Layout.Tile = 'north'; lgd.NumColumns = 3;
+ylabel('Mean absolute error')
+ylim([0 Inf])
+nexttile; hold on; box on; grid on;colororder({'k','k'})
+plot(xstrs, maxaeTrain, 'o', 'Color', colortriplet(1,:), 'MarkerSize', ms, 'LineWidth', lw)
+plot(xstrs, maxaeCV, 's', 'Color', colortriplet(2,:), 'MarkerSize', ms, 'LineWidth', lw)
+plot(xstrs, maxaeTest, 'd', 'Color', colortriplet(3,:), 'MarkerSize', ms, 'LineWidth', lw)
+ylabel('Max absolute error')
+ylim([0 Inf])
+
+set(gcf, 'Units', 'inches', 'Position', [2, 2, 6.5, 2.25])
+
+exportgraphics(gcf, 'figures/best_models_err_summary.tif', 'Resolution', 600)
+exportgraphics(gcf, 'figures/best_models_err_summary.eps', 'Resolution', 600)
 
 
 %% Helper methods
@@ -484,7 +666,7 @@ ax = [];
 figure; tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
 for i = 1:nFeatures
     ax_ = nexttile; box on;
-    plotPartialDependence(Model, i, 'Conditional')
+    plotPartialDependence(Model.Model, i, 'Conditional', 'absolute')
     xlabel(strrep(features(i),'_',' '))
     ylabel('Rel. discharge capacity')
     ax = [ax,ax_];
@@ -499,12 +681,17 @@ end
 function plot_2D_PDP(Model, PTrain, idxFeatures, fname)
 %rf
 features = Model.FeatureVars;
-[pd, x, y] = partialDependence(Model.Model, idxFeatures);
+M = Model.Model;
+if isa(M, 'RegressionLinear')
+    [pd, x, y] = partialDependence(M, idxFeatures, PTrain.X{:,:});
+else
+    [pd, x, y] = partialDependence(M, idxFeatures);
+end
 % 2D plot
 figure;
 contourf(x, y, pd); colormap(plasma(256)); hold on; grid on; box on;
 % scatter of feature values
-scatter(PTrain.X{:,idxFeatures(1)}, PTrainRF.X{:,idxFeatures(2)}, 40, '.k')
+scatter(PTrain.X{:,idxFeatures(1)}, PTrain.X{:,idxFeatures(2)}, 40, '.k')
 % decorations
 cb = colorbar(); cb.Label.String = "Rel. discharge capacity";
 xlabel(strrep(features(idxFeatures(1)),'_',' '));
@@ -512,6 +699,7 @@ ylabel(strrep(features(idxFeatures(2)),'_',' '));
 axis square;
 set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
 
+savefig(gcf, "figures/" + fname + "_2D_PDP")
 exportgraphics(gcf, "figures/" + fname + "_2D_PDP.tif", 'Resolution', 600);
 exportgraphics(gcf, "figures/" + fname + "_2D_PDP.eps", 'Resolution', 600);
 end
@@ -520,7 +708,7 @@ function plot_pred_pdfs(Data, PredsTest, splitVar, splitTitles, modelNames, colo
 z = Data.(splitVar);
 z_unique = unique(z);
 
-figure; t=tiledlayout(1,length(z_unique),...
+figure; t=tiledlayout(1,length(z_unique)+1,...
     'Padding','compact','TileSpacing','compact');
 
 q = linspace(0.7, 1.05);
@@ -534,7 +722,7 @@ pd = fitdist(Y, 'kernel');
 plot(q, pdf(pd,q), '-k', 'LineWidth', lw);
 % predictions
 for i = 1:length(PredsTest)
-    pd = fitdist(PredsTest.YPred{:,i}, 'kernel');
+    pd = fitdist(PredsTest(i).YPred{:,1}, 'kernel');
     plot(q, pdf(pd,q), '-', 'Color', colors(i,:), 'LineWidth', lw);
 end
 xlabel('Rel. capacity');
@@ -542,20 +730,21 @@ title('All data', 'FontWeight', 'normal')
 lgd = legend(['Actual', modelNames], 'NumColumns', length(PredsTest)+1); lgd.Layout.Tile = 'north';
 % by temp
 for i = 1:length(z_unique)
+    nexttile; hold on; box on;
     thisZ = z_unique(i);
     maskZ = z == thisZ;
     pd = fitdist(Y(maskZ), 'kernel');
     plot(q, pdf(pd,q), '-k', 'LineWidth', lw);
     % predictions
     for ii = 1:length(PredsTest)
-        pd = fitdist(PredsTest.YPred{maskZ,ii}, 'kernel');
+        pd = fitdist(PredsTest(ii).YPred{maskZ,1}, 'kernel');
         plot(q, pdf(pd,q), '-', 'Color', colors(ii,:), 'LineWidth', lw);
     end
     xlabel('Rel. capacity');
     title(splitTitles{i}, 'FontWeight', 'normal');
 end
 ylabel(t, 'Density');
-set(gcf, 'Units', 'inches', 'Position', [8,2,6.5,2]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,2]);
 
 annotation(gcf,'textbox',...
     [0.220551282051282 0.609375 0.0390641025641026 0.119791666666667],'String',{'a'},...
@@ -648,25 +837,23 @@ X = Data(:, 5:end); Y = Data(:,2);
 cellsTest = [7,10,13,17,24,30,31];
 maskTest = any(Data.seriesIdx == cellsTest,2);
 X = X(~maskTest,:); Y = Y(~maskTest,:);
-mask_m10C = Data.TdegC_EIS(~maskTest) == -10;
-mask_25C = Data.TdegC_EIS(~maskTest) == 25;
 
 % single freq
-maeSingle = Pipe.maeCrossVal{3};
+maeSingle = Pipe.maeTest{3};
 [~,idxSingle] = min(maeSingle);
 % double freq
-maeDouble = Pipe.maeCrossVal{4};
+maeDouble = Pipe.maeTest{4};
 [~,idxDouble] = min(maeDouble);
 idxFreq = Pipe.Model{4}.idxFreq;
 idxDouble = idxFreq(idxDouble,:);
 % correlation
-maeCorr = Pipe.maeCrossVal{5};
+maeCorr = Pipe.maeTest{5};
 [~,idxCorr] = min(maeCorr);
 idxCorr = Pipe.Model{5}.idxSelected{idxCorr};
 idxCorrVar = ceil(idxCorr/length(freq));
 idxCorrFreq = mod(idxCorr,length(freq))+1;
 % SISSO
-maeSISSO = Pipe.maeCrossVal{6};
+maeSISSO = Pipe.maeTest{6};
 [~,idxSisso] = min(maeSISSO);
 idxSisso = Pipe.Model{6}.idxSelected{idxSisso};
 idxSissoVar = ceil(idxSisso/length(freq));
@@ -687,13 +874,12 @@ lw = 1.25;
 figure; t = tiledlayout(2, 4, 'Padding', 'compact', 'TileSpacing', 'compact');
 % ZReal
 nexttile; hold on; box on; grid on;
-p1 = plot(freq, abs(corr(Y{mask_m10C,:}, X{mask_m10C,idxZreal})), '-.k', 'LineWidth', 1);
-p2 = plot(freq, abs(corr(Y{mask_25C,:}, X{mask_25C,idxZreal})), ':k', 'LineWidth', 1);
-p3 = plot(freq, abs(corr(Y{:,:}, X{:,idxZreal})), '-k', 'LineWidth', 1);
+plot(freq, corr(Y{:,:}, X{:,idxZreal}), '-k', 'LineWidth', 1);
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
 xlabel(t,'Frequency (Hz)', 'FontSize', 10);
-ylabel(["Absolute correlation with";"rel. discharge capacity"], 'FontSize', 10);
+ylabel(["Correlation with";"rel. discharge capacity"], 'FontSize', 10);
 title("Z_{Real} (\Omega)"); 
-ylim([0 1]); set(gca, 'XScale', 'log')
+ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); xlim([min(freq),max(freq)]);
 %features
 xline(freq(idxSingle), '-', 'Color', c(1,:), 'LineWidth', lw);
@@ -712,16 +898,13 @@ if any(idxSissoVar == 1)
         xline(freq(idx(i)), '-', 'Color', c(4,:), 'LineWidth', lw);
     end
 end
-lgd = legend([p1,p2,p3],{'-10\circC data', '25\circC data', 'All data'}, 'NumColumns', 3); 
-lgd.Layout.Tile = 'north';
 
 
 % Zimag
 nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(Y{mask_m10C,:}, X{mask_m10C,idxZimag})), '-.k', 'LineWidth', 1)
-plot(freq, abs(corr(Y{mask_25C,:}, X{mask_25C,idxZimag})), ':k', 'LineWidth', 1)
-plot(freq, abs(corr(Y{:,:}, X{:,idxZimag})), '-k', 'LineWidth', 1)
-title("Z_{Imaginary} (\Omega)"); ylim([0 1]); set(gca, 'XScale', 'log')
+plot(freq, corr(Y{:,:}, X{:,idxZimag}), '-k', 'LineWidth', 1)
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+title("Z_{Imaginary} (\Omega)"); ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); yticklabels([]); xlim([min(freq),max(freq)]);
 xline(freq(idxSingle), '-', 'Color', c(1,:), 'LineWidth', lw);
 for i = 1:length(idxDouble)
@@ -742,10 +925,9 @@ end
 
 % Zmag
 nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(Y{mask_m10C,:}, X{mask_m10C,idxZmag})), '-.k', 'LineWidth', 1)
-plot(freq, abs(corr(Y{mask_25C,:}, X{mask_25C,idxZmag})), ':k', 'LineWidth', 1)
-plot(freq, abs(corr(Y{:,:}, X{:,idxZmag})), '-k', 'LineWidth', 1)
-title("|Z| (\Omega)"); ylim([0 1]); set(gca, 'XScale', 'log')
+plot(freq, corr(Y{:,:}, X{:,idxZmag}), '-k', 'LineWidth', 1)
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+title("|Z| (\Omega)"); ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); yticklabels([]); xlim([min(freq),max(freq)]);
 xline(freq(idxSingle), '-', 'Color', c(1,:), 'LineWidth', lw);
 for i = 1:length(idxDouble)
@@ -766,10 +948,9 @@ end
 
 % Zphz
 nexttile; hold on; box on; grid on;
-plot(freq, abs(corr(Y{mask_m10C,:}, X{mask_m10C,idxZphz})), '-.k', 'LineWidth', 1)
-plot(freq, abs(corr(Y{mask_25C,:}, X{mask_25C,idxZphz})), ':k', 'LineWidth', 1)
-plot(freq, abs(corr(Y{:,:}, X{:,idxZphz})), '-k', 'LineWidth', 1)
-title("\angleZ (\circ)"); ylim([0 1]); set(gca, 'XScale', 'log')
+plot(freq, corr(Y{:,:}, X{:,idxZphz}), '-k', 'LineWidth', 1)
+yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
+title("\angleZ (\circ)"); ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); yticklabels([]); xlim([min(freq),max(freq)]);
 xline(freq(idxSingle), '-', 'Color', c(1,:), 'LineWidth', lw);
 for i = 1:length(idxDouble)
@@ -789,7 +970,7 @@ if any(idxSissoVar == 4)
 end
 
 % features
-y = categorical(["Single freq.","Double freq.","Corr. search", "SISSO"]);
+y = categorical(["Single freq.","Double freq.","Corr. search", "SISSO"], 'Ordinal', true);
 %zreal
 nexttile; hold on; box on; grid on;
 plot(freq(idxSingle), y(1), 'ok', 'MarkerFaceColor', c(1,:));

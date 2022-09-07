@@ -429,7 +429,13 @@ classdef RegressionPipeline
                 maskTrain = training(split, i);
                 XTrain = X(maskTrain, :);
                 YTrain = Y(maskTrain, :);
-                [Pipe, ~] = train(obj, XTrain, YTrain, seriesIdx(maskTrain));
+                obj_ = obj;
+                if any(strcmp(obj_.ModelFuncOpts, 'Weights'))
+                    weights = evenlyWeightDataSeries(seriesIdx(maskTrain));
+                    idx = find(strcmp(obj_.ModelFuncOpts, 'Weights'));
+                    obj_.ModelFuncOpts{idx+1} = weights;
+                end
+                [Pipe, ~] = train(obj_, XTrain, YTrain, seriesIdx(maskTrain));
                 
                 % Test
                 maskTest = test(split, i);
