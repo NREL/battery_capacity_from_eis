@@ -7,18 +7,24 @@ load('data\Data_Denso2021.mat', 'Data')
 freq = Data.Freq(1,:); clearvars Data
 
 % Load the data tables
-load('data\Data_Denso2021_with_interp.mat', 'Data', 'Data2')
-% Filter out noisy interpolated data
-idxKeep = filterInterpData(Data);
-Data = Data(idxKeep, :);
+load('data\Data_Denso2021_AllRPTs.mat', 'Data', 'Data2')
 % Remove series 43 and 44 (cells measured at BOL and not aged)
 Data(Data.seriesIdx == 43, :) = [];
 Data(Data.seriesIdx == 44, :) = [];
 
-% Colormaps file path
+% methods file path
 addpath(genpath('functions'))
 
-%% Plot 1: capacity fade trends, EIS measurement locations denoted
+%% Plot 1: overview of the data
+% a - q vs t
+% b - r vs t
+% c - q vs r
+% d - q vs r, polyfit
+% e - q vs dq/dr from polyfit
+% f - q vs 0.01s r
+% g - q vs 0.1s r
+% h - q vs 10s r
+
 % Use only 25C data, since -10/0/10/25C data share the same capacity
 % measurements / EIS measurement dates
 DataA = Data(Data.TdegC_EIS == 25, :);
@@ -39,8 +45,6 @@ colors3 = brewermap('Greens', 5);
 colors3 = colors3(end-1:end,:);
 colors = [colors1;colors2;colors3];
 idxTest = any([1:31]' == cellsTest, 2);
-colorsTrain = colors(~idxTest, :);
-colorsTest = colors(idxTest, :);
 
 colortriplet = [colors1(3,:); colors2(12,:); colors3(2,:)];
 
@@ -50,132 +54,53 @@ PlotOpt = setPlotOpt(...
     'Colorbar','off');
 DataLineProp = setLineProp('-','Marker','.',...
     'LineWidth',1,'MarkerSize',12,...
-    'Color', colorsTrain);
-plotData(DataA1, 't', 'q', DataLineProp, PlotOpt)
-ylabel('C/3 relative capacity (25\circC)')
-% Denote EIS measurements
-maskEIS = ~logical(DataA1.isInterpEIS);
-plot(DataA1.t(maskEIS), DataA1.q(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
-ylim([0.65 1.1]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [3,3.75,3.25,2.749999999999999]);
-annotation(gcf,'textbox',...
-    [0.82151282051282 0.821969696969697 0.0791282051282054 0.0984848484848488],...
-    'String','a',...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig1a.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig1a.eps', 'Resolution', 600)
-
-DataLineProp = setLineProp('-','Marker','.',...
-    'LineWidth',1,'MarkerSize',12,...
-    'Color', colorsTest);
-plotData(DataA2, 't', 'q', DataLineProp, PlotOpt)
-ylabel('C/3 relative capacity (25\circC)')
-% Denote EIS measurements
-maskEIS = ~logical(DataA2.isInterpEIS);
-plot(DataA2.t(maskEIS), DataA2.q(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
-ylim([0.65 1.1]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [7.375,3.75,3.25,2.749999999999999]);
-annotation(gcf,'textbox',...
-    [0.82151282051282 0.821969696969697 0.0791282051282054 0.0984848484848488],...
-    'String','b',...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig1b.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig1b.eps', 'Resolution', 600)
-
-% DC resistance plots
-PlotOpt = setPlotOpt(...
-    'DataSeriesLabelVar', 'name',...
-    'DataSeriesLabelFormat', 'none',...
-    'Colorbar','off');
-DataLineProp = setLineProp('-','Marker','.',...
-    'LineWidth',1,'MarkerSize',12,...
-    'Color', colorsTrain);
-plotData(DataA1, 't', 'rm10C', DataLineProp, PlotOpt)
-ylabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
-% Denote EIS measurements
-maskEIS = ~logical(DataA1.isInterpEIS);
-plot(DataA1.t(maskEIS), DataA1.rm10C(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
-ylim([0.7 1.7]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [3,0.25,3.375,2.75]);
-annotation(gcf,'textbox',...
-    [0.824599240265906 0.753787878787879 0.0791282051282054 0.0984848484848488],...
-    'String','c',...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig1c.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig1c.eps', 'Resolution', 600)
-
-DataLineProp = setLineProp('-','Marker','.',...
-    'LineWidth',1,'MarkerSize',12,...
-    'Color', colorsTest);
-plotData(DataA2, 't', 'rm10C', DataLineProp, PlotOpt)
-ylabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
-% Denote EIS measurements
-maskEIS = ~logical(DataA2.isInterpEIS);
-plot(DataA2.t(maskEIS), DataA2.rm10C(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
-ylim([0.7 1.7]); xlim([0 500])
-set(gcf, 'Units', 'inches', 'Position', [7.325,0.25,3.375,2.729166666666667]);
-annotation(gcf,'textbox',...
-    [0.82151282051282 0.753787878787879 0.0791282051282054 0.0984848484848488],...
-    'String','d',...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
-ax = gca; kids = ax.Children;
-lgd = legend(kids([8,5,3,1]), {'Storage','Cycling','Drive cycle','EIS'}, 'Location', 'northwest');
-title(lgd, 'Aging condition')
-exportgraphics(gcf, 'figures/data_fig1d.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig1d.eps', 'Resolution', 600)
-
-%%
-% Just plot all data on same graph
-% capacity v time
-PlotOpt = setPlotOpt(...
-    'DataSeriesLabelVar', 'name',...
-    'DataSeriesLabelFormat', 'none',...
-    'Colorbar','off');
-DataLineProp = setLineProp('-','Marker','.',...
-    'LineWidth',1.5,'MarkerSize',8,...
     'Color', colors);
 plotData(DataA, 't', 'q', DataLineProp, PlotOpt)
 ylabel('C/3 relative capacity (25\circC)')
-set(gcf, 'Units', 'inches', 'Position', [8,2,4,3]);
-ax = gca; kids = ax.Children;
-lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'southwest');
-title(lgd, 'Aging condition')
+% Denote EIS measurements
+maskEIS = ~logical(DataA.isInterpEIS);
+plot(DataA.t(maskEIS), DataA.q(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
+ylim([0.65 1.1]); xlim([0 500])
+set(gcf, 'Units', 'inches', 'Position', [2,2,4,3]);
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.82151282051282 0.821969696969697 0.0791282051282054 0.0984848484848488],...
+    'String','a',...
+    'FontSize',12,...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName', 'Arial');
+exportgraphics(gcf, 'figures/data_fig1a.eps', 'Resolution', 600)
 
-% resistance v time
+% DC resistance
+PlotOpt = setPlotOpt(...
+    'DataSeriesLabelVar', 'name',...
+    'DataSeriesLabelFormat', 'none',...
+    'Colorbar','off');
+DataLineProp = setLineProp('-','Marker','.',...
+    'LineWidth',1,'MarkerSize',12,...
+    'Color', colors);
 plotData(DataA, 't', 'rm10C', DataLineProp, PlotOpt)
 ylabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
-set(gcf, 'Units', 'inches', 'Position', [8,2,4,3]);
+% Denote EIS measurements
+maskEIS = ~logical(DataA.isInterpEIS);
+plot(DataA.t(maskEIS), DataA.rm10C(maskEIS), '+k', 'LineWidth', 2, 'MarkerSize', 8);
+ylim([0.7 1.7]); xlim([0 500])
+set(gcf, 'Units', 'inches', 'Position', [2,2,4,3]);
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.824599240265906 0.753787878787879 0.0791282051282054 0.0984848484848488],...
+    'String','b',...
+    'FontSize',12,...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName', 'Arial');
 ax = gca; kids = ax.Children;
-lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northwest');
+lgd = legend(kids([32,8,3,1]), {'Storage','Cycling','Drive cycle','EIS'}, 'Location', 'northwest');
 title(lgd, 'Aging condition')
-
-% capacity v resistance
-plotData(DataA, 'rm10C', 'q', DataLineProp, PlotOpt)
-ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
-xlabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
-set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
-ax = gca; kids = ax.Children;
-lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
-title(lgd, 'Aging condition')
-
-%% multi-part plot:
-% a - q vs r
-% b - q vs r, polyfit
-% c - q vs dq/dr from polyfit
-% d - q vs 0.01s r
-% e - q vs 0.1s r
-% f - q vs 10s r
-
-
-% a
+exportgraphics(gcf, 'figures/data_fig1b.eps', 'Resolution', 600)
+%%
+% c
 PlotOpt = setPlotOpt(...
     'DataSeriesLabelVar', 'name',...
     'DataSeriesLabelFormat', 'none',...
@@ -186,20 +111,21 @@ DataLineProp = setLineProp('-','Marker','.',...
 plotData(DataA, 'rm10C', 'q', DataLineProp, PlotOpt)
 ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
 xlabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
-set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
-ax = gca; kids = ax.Children;
-lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Position', [0.525726495726496,0.588194444444444,0.342948717948718,0.234953703703704]);
-title(lgd, 'Aging condition')
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,3]);
+set(gca, 'FontName', 'Arial')
+% % ax = gca; kids = ax.Children;
+% % lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Position', [0.525726495726496,0.588194444444444,0.342948717948718,0.234953703703704]);
+% % title(lgd, 'Aging condition')
 annotation(gcf,'textbox',...
     [0.827923076923076 0.830176767676767 0.0791282051282055 0.098484848484849],...
-    'String','a',...
+    'String','c',...
     'FontSize',12,...
     'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig2a.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig2a.eps', 'Resolution', 600)
+    'EdgeColor','none',...
+    'FontName','Arial');
+exportgraphics(gcf, 'figures/data_fig1c.eps', 'Resolution', 600)
 
-% b
+% d
 % fit poly model locally, plot fit
 DataA.groupIdx = DataA.seriesIdx;
 polymdl = ReducedOrderModel('polymdl', 'rm10C = a + b*q + c*(q^2) + d*(q^3)', {'a','b','c','d'});
@@ -218,20 +144,21 @@ FitLineProp = setLineProp('-',...
 plotFit(fit, DataA, 'q', DataLineProp, FitLineProp, PlotOpt)
 xlabel({'Rel. C/3 discharge';'capacity (25\circC)'})
 ylabel({'Rel. DC pulse resistance';'(-10\circC, 50% SOC)'})
-set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,3]);
+set(gca, 'FontName', 'Arial')
 % ax = gca; kids = ax.Children;
 % lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
 % title(lgd, 'Aging condition')
 annotation(gcf,'textbox',...
     [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
-    'String','b',...
+    'String','d',...
     'FontSize',12,...
     'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig2b.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig2b.eps', 'Resolution', 600)
+    'EdgeColor','none',...
+    'FontName','Arial');
+exportgraphics(gcf, 'figures/data_fig1d.eps', 'Resolution', 600)
 
-% c - dq/dr for each line as a function of q
+% e - dq/dr for each line as a function of q
 p = fit.p;
 uniqueSeries = unique(DataA.seriesIdx, 'stable');
 figure; hold on; box on; grid on;
@@ -249,12 +176,13 @@ end
 xlabel({'Rel. C/3 discharge';'capacity (25\circC)'})
 ylabel({'Slope of rel. resistance versus';'rel. capacity, dr/dq'})
 % ylabel('$$ \frac{dq}{dr}', 'Interpreter', 'latex')
-set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,3]);
+set(gca, 'FontName', 'Arial')
 ylim([-10 10]); xlim([0.65 1])
 annotation(gcf,'textbox',...
     [0.21574358974359 0.78472222222222 0.486179487179487 0.118055555555554],...
     'String','\downarrow resist. = \downarrow cap.',...
-    'FontSize',12,...
+    'FontSize',10,...
     'FontName','Arial',...
     'FitBoxToText','off',...
     'EdgeColor','none');
@@ -265,21 +193,20 @@ annotation(gcf,'arrow',[0.303 0.303],...
 annotation(gcf,'textbox',...
     [0.206128205128205 0.17361111111111 0.486179487179487 0.118055555555554],...
     'String','\uparrow resist. = \downarrow cap.',...
-    'FontSize',12,...
+    'FontSize',10,...
     'FontName','Arial',...
     'FitBoxToText','off',...
     'EdgeColor','none');
 annotation(gcf,'textbox',...
     [0.824717948717948 0.827777777777778 0.0791282051282055 0.098484848484849],...
-    'String','c',...
-    'FontSize',12,...
+    'String','e',...
+    'FontSize',10,...
     'FontName','Arial',...
     'FitBoxToText','off',...
     'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig2c.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig2c.eps', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig1e.eps', 'Resolution', 600)
 
-% d-f: DCIR at different time constants
+% f-h: DCIR at different time constants
 load('data\Denso\DensoData.mat', 'DensoData');
 DensoData = DensoData(~isnan(DensoData.r25C50soc10s), :);
 
@@ -290,44 +217,13 @@ PlotOpt = setPlotOpt(...
 DataLineProp = setLineProp('-','Marker','.',...
     'LineWidth',1.5,'MarkerSize',8,...
     'Color', colors([1:25,27:end],:));
+
 %0p01s
 plotData(DensoData, 'rm10C50soc0p01s', 'q', DataLineProp, PlotOpt)
 ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
 xlabel({'Rel. DC pulse resistance';'(0-0.01 s, -10\circC, 50% SOC)'})
-set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
-% ax = gca; kids = ax.Children;
-% lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
-% title(lgd, 'Aging condition')
-annotation(gcf,'textbox',...
-    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
-    'String','d',...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig2d.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig2d.eps', 'Resolution', 600)
-%0p1s
-plotData(DensoData, 'rm10C50soc0p1s', 'q', DataLineProp, PlotOpt)
-ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
-xlabel({'Rel. DC pulse resistance';'(0.01-0.1 s, -10\circC, 50% SOC)'})
-set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
-% ax = gca; kids = ax.Children;
-% lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
-% title(lgd, 'Aging condition')
-annotation(gcf,'textbox',...
-    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
-    'String','e',...
-    'FontSize',12,...
-    'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig2e.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig2e.eps', 'Resolution', 600)
-%10s
-plotData(DensoData, 'rm10C50soc10s', 'q', DataLineProp, PlotOpt)
-ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
-xlabel({'Rel. DC pulse resistance';'(0.1-10 s, -10\circC, 50% SOC)'})
-set(gcf, 'Units', 'inches', 'Position', [9.260416666666666,2.479166666666667,3.25,3]);
-xticks([0,1,3,5,7]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.666,3]);
+set(gca, 'FontName', 'Arial')
 % ax = gca; kids = ax.Children;
 % lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
 % title(lgd, 'Aging condition')
@@ -336,11 +232,50 @@ annotation(gcf,'textbox',...
     'String','f',...
     'FontSize',12,...
     'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig2f.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig2f.eps', 'Resolution', 600)
+    'EdgeColor','none',...
+    'FontName','Arial');
+exportgraphics(gcf, 'figures/data_fig1f.eps', 'Resolution', 600)
 
-%% Plot 2: EIS trends versus capacity
+%0p1s
+plotData(DensoData, 'rm10C50soc0p1s', 'q', DataLineProp, PlotOpt)
+% ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
+ylabel('')
+xlabel({'Rel. DC pulse resistance';'(0.01-0.1 s, -10\circC, 50% SOC)'})
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,3]);
+set(gca, 'FontName', 'Arial')
+% ax = gca; kids = ax.Children;
+% lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
+% title(lgd, 'Aging condition')
+annotation(gcf,'textbox',...
+    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
+    'String','g',...
+    'FontSize',12,...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial');
+exportgraphics(gcf, 'figures/data_fig1g.eps', 'Resolution', 600)
+
+%10s
+plotData(DensoData, 'rm10C50soc10s', 'q', DataLineProp, PlotOpt)
+% ylabel({'Rel. C/3 discharge';'capacity (25\circC)'})
+ylabel('')
+xlabel({'Rel. DC pulse resistance';'(0.1-10 s, -10\circC, 50% SOC)'})
+set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,3]);
+set(gca, 'FontName', 'Arial')
+xticks([0,1,3,5,7]);
+% ax = gca; kids = ax.Children;
+% lgd = legend(kids([28,15,2]), {'Storage','Cycling','Drive cycle'}, 'Location', 'northeast');
+% title(lgd, 'Aging condition')
+annotation(gcf,'textbox',...
+    [0.824717948717948 0.826704545454545 0.0791282051282055 0.098484848484849],...
+    'String','h',...
+    'FontSize',12,...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial');
+exportgraphics(gcf, 'figures/data_fig1h.eps', 'Resolution', 600)
+
+%% Plot 2: EIS trends
 % For 1 storage, 1 cycling cell, plot EIS curves for -10C and 25C data
 % Color by capacity (capacity map: 0.6:1) (colormap: cividis) (solid line w/ markers at frequency decades)
 capacity = linspace(1, 0.6, 256);
@@ -350,11 +285,11 @@ colors = plasma(256);
 idxDecades = log10(freq) == round(log10(freq));
 
 % Storage cell: cell 1
-DataEIS1 = Data(Data.seriesIdx == 1, :);
+DataEIS1 = Data(Data.seriesIdx == 1 & Data.isInterpEIS == 0, :);
 DataEIS1_m10C = DataEIS1(DataEIS1.TdegC_EIS == -10, :);
 DataEIS1_25C = DataEIS1(DataEIS1.TdegC_EIS == 25, :);
 
-figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
+figure; t = tiledlayout(1,4, 'Padding', 'none', 'TileSpacing', 'none');
 % Plot -10C nyquist
 nexttile; D = DataEIS1_m10C; hold on; box on; grid on;
 for i = 1:height(D)
@@ -364,8 +299,9 @@ for i = 1:height(D)
     plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
     plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
+xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel(t,'Z_{Imaginary} (10^{-4}\Omega)', 'FontSize', 9.35);
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0 0.008].*1e4); ylim([-0.005 0.003].*1e4); axis('square')
 % Plot 25C nyquist
 nexttile; D = DataEIS1_25C; hold on; box on; grid on;
@@ -376,12 +312,13 @@ for i = 1:height(D)
     plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
     plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
+xlabel('Z_{Real} (10^{-4}\Omega)'); %ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0.0006 0.0012].*1e4); ylim([-0.00045 0.00015].*1e4); axis('square')
 
 % Cycling cell: cell 16
-DataEIS2 = Data(Data.seriesIdx == 16, :);
+DataEIS2 = Data(Data.seriesIdx == 16 & Data.isInterpEIS == 0, :);
 DataEIS2_m10C = DataEIS2(DataEIS2.TdegC_EIS == -10, :);
 DataEIS2_25C = DataEIS2(DataEIS2.TdegC_EIS == 25, :);
 
@@ -394,8 +331,9 @@ for i = 1:height(D)
     plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
     plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
+xlabel('Z_{Real} (10^{-4}\Omega)'); %ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0 0.008].*1e4); ylim([-0.005 0.003].*1e4); axis('square')
 % Plot 25C nyquist
 nexttile; D = DataEIS2_25C; hold on; box on; grid on;
@@ -406,47 +344,54 @@ for i = 1:height(D)
     plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
     plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
+xlabel('Z_{Real} (10^{-4}\Omega)'); %ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0.0006 0.0012].*1e4); ylim([-0.00045 0.00015].*1e4); axis('square')
 
-tickLabels = round(linspace(floor(min(capacity)*100), 100, 5));
-ticklabels = compose("%d%%", tickLabels);
-
+ticklabels = linspace(floor(min(capacity)*100)/100, 1, 5);
 c = colorbar('Colormap', flipud(colors), 'Limits', [0 1],...
     'Ticks', [0 0.25 0.5 0.75 1], 'TickLabels', ticklabels);
 c.Label.String = 'Rel. discharge capacity';
-c.Label.Position = [-1.065833330154419,0.494624137878418,0];
+c.Label.FontName = 'Arial'; c.Label.FontSize = 9.35;
+c.Label.Position = [-1.06,0.494624137878418,0];
 c.TickLength = 0.02;
 c.Layout.Tile = 'east';
-
-set(gcf, 'Units', 'inches', 'Position', [2,2,7.90625,1.75]);
 
 annotation(gcf,'textbox',...
     [0.0734637681159421 0.797619047619048 0.0293030303030303 0.160714285714286],...
     'String',{'a'},...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 annotation(gcf,'textbox',...
-    [0.301395256916996 0.803571428571428 0.0293030303030302 0.160714285714286],...
+    [0.295 0.797619047619048 0.0293030303030302 0.160714285714286],...
     'String','b',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 annotation(gcf,'textbox',...
-    [0.535914361001318 0.803571428571428 0.0293030303030302 0.160714285714286],...
+    [0.515 0.797619047619048 0.0293030303030302 0.160714285714286],...
     'String','c',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 annotation(gcf,'textbox',...
-    [0.763845849802372 0.809523809523809 0.0293030303030303 0.160714285714286],...
+    [0.74 0.797619047619048 0.0293030303030303 0.160714285714286],...
     'String','d',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 
-exportgraphics(gcf, 'figures/data_fig3.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig3.eps', 'Resolution', 600)
+set(gcf, 'Units', 'inches', 'Position', [1,1,8,2]);
 
-%% Plot 3: EIS trends vs. temperature, SOC
+exportgraphics(gcf, 'figures/data_fig2abcd.eps', 'Resolution', 600)
+
+%%
 % ax1: BOL vs T
 Data_ax1 = Data2(Data2.seriesIdx == 44, :);
 Data_ax1 = sortrows(Data_ax1, 'TdegC_EIS');
@@ -466,7 +411,7 @@ temps = Data_ax1.TdegC_EIS;
 colorsSOC = cividis(height(Data_ax3));
 
 % plots
-figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
+figure; t = tiledlayout(1,2, 'Padding', 'none', 'TileSpacing', 'none');
 % Plot BOL vs T
 nexttile; D = Data_ax1; hold on; box on; grid on;
 for i = 1:height(D)
@@ -474,8 +419,9 @@ for i = 1:height(D)
     plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
     plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
+xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel(t, 'Z_{Imaginary} (10^{-4}\Omega)', 'FontSize', 9.35);
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0 0.008].*1e4); ylim([-0.005 0.003].*1e4); axis('square')
 % Plot Aged vs T
 nexttile; D = Data_ax2; hold on; box on; grid on;
@@ -485,37 +431,43 @@ for i = 1:height(D)
     plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
     plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
+xlabel('Z_{Real} (10^{-4}\Omega)'); %ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0 0.008].*1e4); ylim([-0.005 0.003].*1e4); axis('square')
 
 
-tickLabels = temps;
-ticklabels = compose("%d", tickLabels);
+ticklabels = temps;
+ticklabels = compose("%d", ticklabels);
 c = colorbar('Colormap', colorsT, 'Limits', [0 1],...
     'Ticks', linspace(0,1,length(temps)), 'TickLabels', ticklabels);
 c.Label.String = 'Temperature (\circC)';
 c.Label.Position = [-1.065833330154419,0.494624137878418,0];
+c.Label.FontName = 'Arial';
+c.Label.FontSize = 9.35;
 c.TickLength = 0.02;
 c.Layout.Tile = 'east';
 
-set(gcf, 'Units', 'inches', 'Position', [2,2,4.3,1.75]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,4,2]);
 
 annotation(gcf,'textbox',...
-    [0.557900726392252 0.803571428571428 0.0667966101694913 0.154761904761905],...
-    'String','b',...
+    [0.14 0.75 0.0667966101694913 0.154761904761905],...
+    'String','e',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 annotation(gcf,'textbox',...
-    [0.13417191283293 0.80952380952381 0.0667966101694915 0.154761904761905],...
-    'String',{'a'},...
+    [0.53 0.75 0.0667966101694915 0.154761904761905],...
+    'String',{'f'},...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 
-exportgraphics(gcf, 'figures/data_fig4ab.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig4ab.eps', 'Resolution', 600)
-
-figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
+exportgraphics(gcf, 'figures/data_fig2ef.eps', 'Resolution', 600)
+%%
+figure; t = tiledlayout(1,2, 'Padding', 'none', 'TileSpacing', 'none');
 % Plot BOL vs T
 nexttile; D = Data_ax3; hold on; box on; grid on;
 for i = 1:height(D)
@@ -525,6 +477,7 @@ for i = 1:height(D)
 end
 xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0 0.007].*1e4); ylim([-0.004 0.003].*1e4); axis('square')
 % Plot Aged vs T
 nexttile; D = Data_ax4; hold on; box on; grid on;
@@ -533,35 +486,41 @@ for i = 1:height(D)
     plot(D.Zreal(i,:).*1e4, D.Zimag(i,:).*1e4, '-', 'Color', c, 'LineWidth', 2)
     plot(D.Zreal(i,idxDecades).*1e4, D.Zimag(i,idxDecades).*1e4, 'd', 'MarkerSize', 6, 'Color', c, 'MarkerFaceColor', c)
 end
-xlabel('Z_{Real} (10^{-4}\Omega)'); ylabel('Z_{Imaginary} (10^{-4}\Omega)');
+xlabel('Z_{Real} (10^{-4}\Omega)'); %ylabel('Z_{Imaginary} (10^{-4}\Omega)');
 set(gca, 'YDir', 'reverse');
+set(gca, 'FontName', 'Arial')
 xlim([0 0.009].*1e4); ylim([-0.005 0.004].*1e4); axis('square')
 
 
-tickLabels = Data_ax4.soc_EIS.*100;
-ticklabels = compose("%d%%", tickLabels);
+ticklabels = Data_ax4.soc_EIS.*100;
+ticklabels = compose("%d%%", ticklabels);
 c = colorbar('Colormap', colorsSOC, 'Limits', [0 1],...
     'Ticks', linspace(0.1,0.9,length(Data_ax4.soc_EIS)), 'TickLabels', ticklabels);
 c.Label.String = 'State of charge';
+c.Label.FontName = 'Arial';
+c.Label.FontSize = 9.35;
 c.Label.Position = [-1.065833330154419,0.494624137878418,0];
 c.TickLength = 0.02;
 c.Layout.Tile = 'east';
 
-set(gcf, 'Units', 'inches', 'Position', [2,2,4.3,1.75]);
+set(gcf, 'Units', 'inches', 'Position', [2,2,4,1.8]);
 
 annotation(gcf,'textbox',...
-    [0.560322033898306 0.761904761904761 0.0667966101694913 0.154761904761905],...
-    'String','d',...
+    [0.14 0.75 0.0667966101694913 0.154761904761905],...
+    'String','g',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 annotation(gcf,'textbox',...
-    [0.14143583535109 0.761904761904761 0.0667966101694914 0.154761904761905],...
-    'String','c',...
+    [0.53 0.75 0.0667966101694915 0.154761904761905],...
+    'String',{'h'},...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 
-exportgraphics(gcf, 'figures/data_fig4cd.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig4cd.eps', 'Resolution', 600)
+exportgraphics(gcf, 'figures/data_fig2gh.eps', 'Resolution', 600)
 
 %% UMAP, data at all temps and socs
 DataAll = [Data(~logical(Data.isInterpEIS),[17,24,25,27,28]); Data2(:,[3,4,5,7,8])];
@@ -580,46 +539,52 @@ markersize = 8;
 figure; hold on; box on; grid on;
 colormap(plasma(256));
 scatter(reduction(:,1), reduction(:,2), markersize, DataAll.q, 'o', 'filled');
-cb = colorbar(); cb.Label.String = 'Rel. discharge capacity';
+cb = colorbar(); cb.Label.String = 'Rel. discharge capacity'; cb.Label.FontSize = 10;
 xlabel('Component 1'); ylabel('Component 2');
 set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
+set(gca, 'FontName', 'Arial')
 annotation(gcf,'textbox',...
-    [0.647367521367521 0.825 0.0695128205128205 0.0972222222222221],...
+    [0.15 0.825 0.0695128205128205 0.0972222222222221],...
     'String','a',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig5a.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig5a.eps', 'Resolution', 600)
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 12);
+exportgraphics(gcf, 'figures/data_fig3a.eps', 'Resolution', 600)
 
 % temperature colors
 figure; hold on; box on; grid on;
 colormap(viridis(256));
 scatter(reduction(:,1), reduction(:,2), markersize, DataAll.TdegC_EIS, 'o', 'filled');
-cb = colorbar(); cb.Label.String = 'Temperature (\circC)';
+cb = colorbar(); cb.Label.String = 'Temperature (\circC)'; cb.Label.FontSize = 10;
 xlabel('Component 1'); ylabel('Component 2');
 set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
+set(gca, 'FontName', 'Arial')
 annotation(gcf,'textbox',...
-    [0.647367521367521 0.825 0.0695128205128205 0.0972222222222221],...
+    [0.15 0.825 0.0695128205128205 0.0972222222222221],...
     'String','b',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig5b.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig5b.eps', 'Resolution', 600)
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 12);
+exportgraphics(gcf, 'figures/data_fig3b.eps', 'Resolution', 600)
 
 % soc colors
 figure; hold on; box on; grid on;
 colormap(cividis(256));
 scatter(reduction(:,1), reduction(:,2), markersize, DataAll.soc_EIS, 'o', 'filled');
-cb = colorbar(); cb.Label.String = 'State of charge';
+cb = colorbar(); cb.Label.String = 'State of charge'; cb.Label.FontSize = 10;
 xlabel('Component 1'); ylabel('Component 2');
 set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
+set(gca, 'FontName', 'Arial')
 annotation(gcf,'textbox',...
-    [0.647367521367521 0.825 0.0695128205128205 0.0972222222222221],...
+    [0.15 0.825 0.0695128205128205 0.0972222222222221],...
     'String','c',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
-exportgraphics(gcf, 'figures/data_fig5c.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig5c.eps', 'Resolution', 600)
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 12);
+exportgraphics(gcf, 'figures/data_fig3c.eps', 'Resolution', 600)
 
 %% Plot 4: correlations
 % get rid of interp EIS data
@@ -652,10 +617,11 @@ p6 = plot(freq, corr(DataA2.q, DataA2.Zreal), '--', 'Color', colortriplet(2,:), 
 %decorations
 xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('corr(q,Z_{Real}(f))' , 'FontSize', 10);
 lgd = legend([p1 p2 p3 p4 p5 p6],...
-    {'Train data', 'Test data',...
-    'Train data (-10 \circC)', 'Test data (-10 \circC)',...
-    'Train data (25 \circC)', 'Test data (25 \circC)'}); 
+    {'Training ', 'Test',...
+    'Training (-10 \circC)', 'Test (-10 \circC)',...
+    'Training (25 \circC)', 'Test (25 \circC)'});
 lgd.Layout.Tile = 'east'; ylim([-1 1]); set(gca, 'XScale', 'log')
+set(gca, 'FontName', 'Arial')
 
 % Zimag
 nexttile; hold on; box on; grid on;
@@ -672,10 +638,25 @@ plot(freq, corr(DataA2.q, DataA2.Zimag), '--', 'Color', colortriplet(2,:), 'Line
 %label
 xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('corr(q,Z_{Imaginary}(f))', 'FontSize', 10);
 ylim([-1 1]); set(gca, 'XScale', 'log')
-set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,2])
+set(gcf, 'Units', 'inches', 'Position', [2,2,8,2.5])
+set(gca, 'FontName', 'Arial')
 
-exportgraphics(gcf, 'figures/data_fig6.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig6.eps', 'Resolution', 600)
+annotation(gcf,'textbox',...
+    [0.35 0.788194444444444 0.044940170940171 0.145833333333333],...
+    'String',{'a'},...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 12);
+annotation(gcf,'textbox',...
+    [0.75 0.795138888888888 0.044940170940171 0.145833333333333],...
+    'String','b',...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 12);
+
+exportgraphics(gcf, 'figures/data_fig4ab.eps', 'Resolution', 600)
 
 %% Plot 5: examine extracted statistical features
 
@@ -702,86 +683,65 @@ plot(stats, abs(corr(Data.q(~maskTest), X1{~maskTest,:})), 'ok', 'LineWidth', 1.
 plot(stats, abs(corr(Data.q(maskTest), X1{maskTest,:})), 'dk', 'LineWidth', 1.5)
 % decorations
 ylabel(t,["Absolute correlation with";"C/3 rel. discharge capacity"], 'FontSize', 10);
-title('Z_{Real}'); 
+title('Z_{Real}', 'FontWeight', 'normal'); 
 lgd = legend('Train data', 'Test data'); 
-lgd.Layout.Tile = 'east'; 
 ylim([0 1]);
+set(gca, 'FontName', 'Arial')
+
 % Zimag
 nexttile; hold on; box on; grid on;
 plot(stats, abs(corr(Data.q(~maskTest), X2{~maskTest,:})), 'ok', 'LineWidth', 1.5)
 plot(stats, abs(corr(Data.q(maskTest), X2{maskTest,:})), 'dk', 'LineWidth', 1.5)
-title('Z_{Imaginary}'); ylim([0 1]);
+title('Z_{Imaginary}', 'FontWeight', 'normal'); ylim([0 1]);
+set(gca, 'FontName', 'Arial')
 % Zmag
 nexttile; hold on; box on; grid on;
 plot(stats, abs(corr(Data.q(~maskTest), X3{~maskTest,:})), 'ok', 'LineWidth', 1.5)
 plot(stats, abs(corr(Data.q(maskTest), X3{maskTest,:})), 'dk', 'LineWidth', 1.5)
-title('|Z|'); ylim([0 1]);  
+title('|Z|', 'FontWeight', 'normal'); ylim([0 1]);  
+set(gca, 'FontName', 'Arial')
 % Zphz
 nexttile; hold on; box on; grid on;
 plot(stats, abs(corr(Data.q(~maskTest), X4{~maskTest,:})), 'ok', 'LineWidth', 1.5)
 plot(stats, abs(corr(Data.q(maskTest), X4{maskTest,:})), 'dk', 'LineWidth', 1.5)
 % title
-title('\angleZ'); ylim([0 1]);
+title('\angleZ', 'FontWeight', 'normal'); ylim([0 1]);
+set(gca, 'FontName', 'Arial')
 % size
-set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,2])
+set(gcf, 'Units', 'inches', 'Position', [2,2,8,2])
 
-exportgraphics(gcf, 'figures/data_fig7.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig7.eps', 'Resolution', 600)
+annotation(gcf,'textbox',...
+    [0.085 0.68 0.0293030303030303 0.160714285714286],...
+    'String',{'c'},...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
+annotation(gcf,'textbox',...
+    [0.315 0.68 0.0293030303030302 0.160714285714286],...
+    'String','d',...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
+annotation(gcf,'textbox',...
+    [0.54 0.68 0.0293030303030302 0.160714285714286],...
+    'String','e',...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
+annotation(gcf,'textbox',...
+    [0.77 0.68 0.0293030303030303 0.160714285714286],...
+    'String','f',...
+    'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName','Arial',...
+    'FontSize', 11);
 
-%% Plot 6: examine extracted PCA, UMAP features
-DataAll = [Data(:,[1,17,24,25,27,28]); Data2(:,[1,3,4,5,7,8])];
-maskTest = any(DataAll.seriesIdx == cellsTest, 2);
-Xtrain = DataAll{~maskTest,{'Zreal','Zimag'}}; [Xtrain,mu,sigma] = zscore(Xtrain);
-Xtest = DataAll{maskTest,{'Zreal','Zimag'}}; Xtest = (Xtest - mu) ./ sigma;
+exportgraphics(gcf, 'figures/data_fig4cdef.eps', 'Resolution', 600)
 
-% UMAP
-min_dist = 1;
-n_neighbors = 30;
-umap = UMAP('min_dist',min_dist,'n_neighbors',n_neighbors);
-umap = umap.fit(Xtrain); 
-reductionTrain = umap.embedding;
-reductionTest = umap.transform(Xtest);
-% PCA
-[coeffTrain,scoreTrain,~,~,explained,means] = pca(Xtrain);
-scoreTest = (Xtest - means)*coeffTrain(:, 1:10);
-
-lw = 1.5;
-colors = plasma(256);
-% scatter plots of scores colored by capacity
-figure; t = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
-% PCA
-nexttile; hold on; box on; grid on;
-scatter(flipud(scoreTrain(:,1)), flipud(scoreTrain(:,2)), 10, flipud(DataAll.q(~maskTest)), 'o', 'filled');
-scatter(scoreTest(:,1), scoreTest(:,2), 80, DataAll.q(maskTest), 'x', 'LineWidth', lw);
-% axis([-15 50 -50 50]); yticks([-50 -30 -10 10 30 50]);
-
-colormap(colors);
-title('PCA', 'FontWeight', 'normal')
-lgd = legend('Train data', 'Test data', 'NumColumns', 2); 
-lgd.Layout.Tile = 'north';
-
-cb = colorbar(); cb.Label.String = 'Rel. discharge capacity';
-cb.Layout.Tile = 'east';
-cb.Label.Position = [-1.073333263397217,0.826218433420054,0];
-
-xlabel('Component 1')
-ylabel('Component 2')
-
-% UMAP
-nexttile; hold on; box on; grid on;
-scatter(reductionTrain(:,1), reductionTrain(:,2), 10, DataAll.q(~maskTest), 'o', 'filled');
-scatter(reductionTest(:,1), reductionTest(:,2), 80, DataAll.q(maskTest), 'x', 'LineWidth', lw);
-% axis([-15 50 -50 50]); yticks([-50 -30 -10 10 30 50]);
-title('UMAP', 'FontWeight', 'normal')
-xlabel('Component 1')
-% ylabel('Component 2')
-
-set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2])
-
-exportgraphics(gcf, 'figures/data_fig8.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig8.eps', 'Resolution', 600)
-
-%% Fig 7 - example of graphical features from -10C data
+%% graphical features from -10C data
 % Grab a single EIS measurement, show graphical features
 D = Data(Data.seriesIdx == 16, :);
 D = D(1,:);
@@ -812,40 +772,17 @@ plot(D.Zreal(idx3).*1e4, D.Zimag(idx3).*1e4, 'or', 'LineWidth', 2)
 plot(D.Zreal(end).*1e4, D.Zimag(end).*1e4, 'or', 'LineWidth', 2)
 
 set(gcf, 'Units', 'inches', 'Position', [5,3,3.25,2.5])
+set(gca, 'FontName', 'Arial')
 
 annotation(gcf,'textarrow',[0.438034188034188 0.414529914529915],...
-    [0.313888888888889 0.233333333333333],'String',{'f = 10^4'});
+    [0.313888888888889 0.233333333333333],'String',{'f = 10^4'},'FontName', 'Arial');
 annotation(gcf,'textarrow',[0.408119658119658 0.331196581196581],...
-    [0.462888888888889 0.422222222222222],'String',{'Min Z_{Real}'});
+    [0.462888888888889 0.422222222222222],'String',{'Min Z_{Real}'},'FontName', 'Arial');
 annotation(gcf,'textarrow',[0.344017094017094 0.333333333333333],...
-    [0.713888888888889 0.583333333333333],'String',{'f = 10^2'});
+    [0.713888888888889 0.583333333333333],'String',{'f = 10^2'},'FontName', 'Arial');
 annotation(gcf,'textarrow',[0.568376068376068 0.613247863247863],...
-    [0.683333333333333 0.602777777777778],'String',{'f = 10^0'});
+    [0.683333333333333 0.602777777777778],'String',{'f = 10^0'},'FontName', 'Arial');
 annotation(gcf,'textarrow',[0.645299145299145 0.694444444444444],...
-    [0.811111111111111 0.647222222222222],'String',{'Lowest freq.'});
+    [0.811111111111111 0.647222222222222],'String',{'Lowest freq.'},'FontName', 'Arial');
 
-exportgraphics(gcf, 'figures/data_fig9.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/data_fig9.eps', 'Resolution', 600)
-
-%% Helper methods
-function idxKeep = filterInterpData(Data)
-% If the value of Zmag at 100 Hz for the interpolated data is not within
-% the range of Zmag at 10 Hz for all of the raw data for that
-% temperature/cell, then get rid of that row.
-idxKeep = true(height(Data), 1);
-idxFreq = 36;
-mask_m10C = Data.TdegC_EIS == -10;
-mask_25C = Data.TdegC_EIS == 25;
-uniqueSeries = unique(Data.seriesIdx, 'stable');
-for thisSeries = uniqueSeries'
-    maskSeries = Data.seriesIdx == thisSeries;
-    % -10C
-    maskSeries_m10C = maskSeries & mask_m10C;
-    Zmag = Data.Zmag(maskSeries_m10C, idxFreq);
-    idxKeep(maskSeries_m10C) = Zmag >= min(Zmag(~Data.isInterpEIS(maskSeries_m10C))) & Zmag <= max(Zmag(~Data.isInterpEIS(maskSeries_m10C)));
-    % 25C
-    maskSeries_25C = maskSeries & mask_25C;
-    Zmag = Data.Zmag(maskSeries_25C, idxFreq);
-    idxKeep(maskSeries_25C) = Zmag >= min(Zmag(~Data.isInterpEIS(maskSeries_25C))) & Zmag <= max(Zmag(~Data.isInterpEIS(maskSeries_25C)));
-end
-end
+exportgraphics(gcf, 'figures/data_fig5.eps', 'Resolution', 600)

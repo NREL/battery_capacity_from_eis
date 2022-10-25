@@ -25,8 +25,7 @@ colorsTrain = colors(~idxTest, :);
 colorsTest = colors(idxTest, :);
 
 % Get two frequency model frequency indices array
-load('results\pipes_linear.mat', 'Pipes_Linear')
-idxFreq = Pipes_Linear.Model{4}.idxFreq;
+idxFreq = nchoosek([1:69],2);
 
 % Load model results
 load('results\pipes_gpr_noModels.mat', 'Pipes_GPR');
@@ -56,26 +55,37 @@ plot(freq, maeTestRF, '-', 'Color', colortriplet(3,:),  'LineWidth', 1.5)
 mae_1freq_min = min([maeTestLinear; maeTestGpr; maeTestRF]);
 yline(mae_1freq_min, '--k', 'LineWidth', 1.5)
 annotation(gcf,'textbox',...
-    [0.290598290598291 0.181623931623932 0.581196581196581 0.0833333333333333],...
+    [0.290598290598291 0.22 0.581196581196581 0.0833333333333333],...
     'String', sprintf("Minimum test MAE: %0.2g", mae_1freq_min),...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName', 'Arial');
 
 % decorations
 legend(...
     "Linear, CV", "GPR, CV", "RF, CV",...
     "Linear, Test", "GPR, Test", "RF, Test", ...
-    'Location', 'northoutside',...
-    'NumColumns', 2)
-set(gca, 'XScale', 'log'); ylim([0 Inf])
+    'Location', 'northeast',...
+    'NumColumns', 1,...
+    'FontSize', 7,...
+    'FontName', 'Arial')
+set(gca, 'XScale', 'log'); ylim([0 0.15])
+xticks([1e-2 1e0 1e2 1e4]); set(gca, 'XMinorGrid', 'Off')
 xlabel('Frequency (Hz)');
 ylabel('MAE')
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.177282051282051 0.825 0.0823333333333334 0.116666666666667],...
+    'String',{'a'},...
+    'FontSize',12,...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
 
 % set size
-set(gcf, 'Units', 'inches', 'Position', [3,3,3.25,3.25])
+set(gcf, 'Units', 'inches', 'Position', [3,3,3.25,2.5])
 
 % save
-exportgraphics(gcf, 'figures/mae_vs_freq_singleFreqModels.tif', 'Resolution', 600)
 exportgraphics(gcf, 'figures/mae_vs_freq_singleFreqModels.eps', 'Resolution', 600)
 
 %% MAE vs frequency for double freq models
@@ -95,8 +105,10 @@ for i = 1:size(idxFreq,1)
     z(idxFreq(i,1),idxFreq(i,2)) = maeTestLinear(i);
 end
 [x,y] = meshgrid(freq,freq);
-figure; contourf(y,x,z,levels); colormap(cmap);
-cb = colorbar(); cb.Label.String = "MAE_{Test}";
+figure; tiledlayout('flow'); nexttile;
+contourf(y,x,z,levels); colormap(cmap);
+cb = colorbar(); cb.Label.String = "MAE_{Test}"; cb.Layout.Tile = 'east';
+cb.Label.Position = [-1.183333396911621,0.038602659295312,0];
 set(gca, 'XScale', 'log', 'Yscale', 'log')
 hold on; box on; grid on;
 [~, idxBest] = min(maeTestLinear);
@@ -112,8 +124,16 @@ annotation(gcf,'textbox',...
     [0.202991452991453 0.686111111111111 0.273504273504274 0.158333333333333],...
     'String',sprintf("Minimum MAE: %0.2g", min(maeTestLinear)),...
     'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName', 'Arial');
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.19651282051282,0.808333333333333,0.082333333333333,0.116666666666667],...
+    'String',{'b'},...
+    'FontSize',12,...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
     'EdgeColor','none');
-exportgraphics(gcf, 'figures/mae_vs_freq_doubleFreq_linear.tif', 'Resolution', 600)
 exportgraphics(gcf, 'figures/mae_vs_freq_doubleFreq_linear.eps', 'Resolution', 600)
 
 % Gpr
@@ -122,8 +142,10 @@ for i = 1:size(idxFreq,1)
     z(idxFreq(i,1),idxFreq(i,2)) = maeTestGpr(i);
 end
 [x,y] = meshgrid(freq,freq);
-figure; contourf(y,x,z,levels); colormap(cmap);
-cb = colorbar(); cb.Label.String = "MAE_{Test}";
+figure; tiledlayout('flow'); nexttile;
+contourf(y,x,z,levels); colormap(cmap);
+cb = colorbar(); cb.Label.String = "MAE_{Test}"; cb.Layout.Tile = 'east';
+cb.Label.Position = [-1.183333396911621,0.035602659295312,0];
 set(gca, 'XScale', 'log', 'Yscale', 'log')
 hold on; box on; grid on;
 [~, idxBest] = min(maeTestGpr);
@@ -139,8 +161,16 @@ annotation(gcf,'textbox',...
     [0.202991452991453 0.686111111111111 0.273504273504274 0.158333333333333],...
     'String',sprintf("Minimum MAE: %0.2g", min(maeTestGpr)),...
     'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName', 'Arial');
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.19651282051282,0.808333333333333,0.082333333333333,0.116666666666667],...
+    'String',{'c'},...
+    'FontSize',12,...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
     'EdgeColor','none');
-exportgraphics(gcf, 'figures/mae_vs_freq_doubleFreq_gpr.tif', 'Resolution', 600)
 exportgraphics(gcf, 'figures/mae_vs_freq_doubleFreq_gpr.eps', 'Resolution', 600)
 
 % RF
@@ -149,8 +179,10 @@ for i = 1:size(idxFreq,1)
     z(idxFreq(i,1),idxFreq(i,2)) = maeTestRF(i);
 end
 [x,y] = meshgrid(freq,freq);
-figure; contourf(y,x,z,levels); colormap(cmap);
-cb = colorbar(); cb.Label.String = "MAE_{Test}";
+figure; tiledlayout('flow'); nexttile;
+contourf(y,x,z,levels); colormap(cmap);
+cb = colorbar(); cb.Label.String = "MAE_{Test}"; cb.Layout.Tile = 'east';
+cb.Label.Position = [-1.183333396911621,0.036602659295312,0];
 set(gca, 'XScale', 'log', 'Yscale', 'log')
 hold on; box on; grid on;
 [~, idxBest] = min(maeTestRF);
@@ -166,8 +198,16 @@ annotation(gcf,'textbox',...
     [0.202991452991453 0.686111111111111 0.273504273504274 0.158333333333333],...
     'String',sprintf("Minimum MAE: %0.2g", min(maeTestRF)),...
     'FitBoxToText','off',...
+    'EdgeColor','none',...
+    'FontName', 'Arial');
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.19651282051282,0.808333333333333,0.082333333333333,0.116666666666667],...
+    'String',{'d'},...
+    'FontSize',12,...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
     'EdgeColor','none');
-exportgraphics(gcf, 'figures/mae_vs_freq_doubleFreq_rf.tif', 'Resolution', 600)
 exportgraphics(gcf, 'figures/mae_vs_freq_doubleFreq_rf.eps', 'Resolution', 600)
 
 %% Heatmap of MAEs
@@ -192,10 +232,10 @@ plotFeatureSelections(Pipes_RF, "RF", Data, freq)
 clearvars Data Pipes_Linear Pipes_GPR Pipes_RF
 
 %% MAE train on x-axis, MAE CV and MAE test on y axis, all models
-% Load model results
-load('results\pipes_gpr_noModels.mat', 'Pipes_GPR');
-load('results\pipes_linear_noModels.mat', 'Pipes_Linear')
-load('results\pipes_rf_noModels.mat', 'Pipes_RF')
+% % % Load model results
+% % load('results\pipes_gpr_noModels.mat', 'Pipes_GPR');
+% % load('results\pipes_linear_noModels.mat', 'Pipes_Linear')
+% % load('results\pipes_rf_noModels.mat', 'Pipes_RF')
 
 [maeTrain_linear, maeCV_linear, maeTest_linear] = unwrapMAEs(Pipes_Linear);
 [maeTrain_gpr, maeCV_gpr, maeTest_gpr] = unwrapMAEs(Pipes_GPR);
@@ -217,57 +257,64 @@ nexttile; box on; grid on; hold on;
 histogram2(gca, maeTrain_linear, maeTest_linear, xedges, yedges, 'DisplayStyle', 'Tile', 'ShowEmptyBins', 'On', 'EdgeColor', 'none');
 colormap(gca, [0.8,0.8,0.8; brewermap('RdPu', 255)]);
 % plot(maeTrain_baseline, maeTest_baseline, 'dk', 'LineWidth', 2);
-xline(maeTrain_baseline, '-k', 'LineWidth', 1); yline(maeTest_baseline, '-k', 'LineWidth', 1)
+xline(maeTrain_baseline, '--k', 'LineWidth', 1); yline(maeTest_baseline, '--k', 'LineWidth', 1)
 ylim([0 0.2]); xlim([0 0.075]); 
 xlabel('MAE_{Train}'); ylabel('MAE_{Test}');
 title('Linear', 'FontWeight', 'normal')
+set(gca, 'FontName', 'Arial')
 
 nexttile; box on; grid on; hold on;
 histogram2(gca, maeTrain_gpr, maeTest_gpr, xedges, yedges, 'DisplayStyle', 'Tile', 'ShowEmptyBins', 'On', 'EdgeColor', 'none');
 colormap(gca, [0.8,0.8,0.8; brewermap('Blues', 255)]);
 % plot(maeTrain_baseline, maeTest_baseline, 'dk', 'LineWidth', 2)
-xline(maeTrain_baseline, '-k', 'LineWidth', 1); yline(maeTest_baseline, '-k', 'LineWidth', 1)
+xline(maeTrain_baseline, '--k', 'LineWidth', 1); yline(maeTest_baseline, '--k', 'LineWidth', 1)
 ylim([0 0.2]); xlim([0 0.075]);
 xlabel('MAE_{Train}'); ylabel('MAE_{Test}');
 title('GPR', 'FontWeight', 'normal')
+set(gca, 'FontName', 'Arial')
 
 nexttile; box on; grid on; hold on;
 histogram2(gca, maeTrain_rf, maeTest_rf, xedges, yedges, 'DisplayStyle', 'Tile', 'ShowEmptyBins', 'On', 'EdgeColor', 'none');
 colormap(gca, [0.8,0.8,0.8; brewermap('Greens', 255)]);
 % plot(maeTrain_baseline, maeTest_baseline, 'dk', 'LineWidth', 2)
-xline(maeTrain_baseline, '-k', 'LineWidth', 1); yline(maeTest_baseline, '-k', 'LineWidth', 1)
+xline(maeTrain_baseline, '--k', 'LineWidth', 1); yline(maeTest_baseline, '--k', 'LineWidth', 1)
 ylim([0 0.2]); xlim([0 0.075]);
 xlabel('MAE_{Train}'); ylabel('MAE_{Test}');
 title('RF', 'FontWeight', 'normal')
+set(gca, 'FontName', 'Arial')
 
 cb = colorbar();
 cb.Layout.Tile = 'east';
 cb.Label.String = 'Counts';
 cb.Label.Position = [-0.080833256244659,125.7824167907238,0];
 cb.Label.FontSize = 10;
+cb.Label.FontName = 'Arial';
 
 % mae CV vs mae train, compare v baseline, ax1-linear, ax2-gpr, ax3-rf
 nexttile; box on; grid on; hold on;
 histogram2(gca, maeTrain_linear, maeCV_linear, xedges, yedges, 'DisplayStyle', 'Tile', 'ShowEmptyBins', 'On', 'EdgeColor', 'none');
 colormap(gca, [0.8,0.8,0.8; brewermap('RdPu', 255)]);
 % plot(maeTrain_baseline, maeCV_baseline, 'dk', 'LineWidth', 2)
-xline(maeTrain_baseline, '-k', 'LineWidth', 1); yline(maeCV_baseline, '-k', 'LineWidth', 1)
+xline(maeTrain_baseline, '--k', 'LineWidth', 1); yline(maeCV_baseline, '--k', 'LineWidth', 1)
 ylim([0 0.2]); xlim([0 0.075]);
 xlabel('MAE_{Train}'); ylabel('MAE_{CV}');
+set(gca, 'FontName', 'Arial')
 nexttile; box on; grid on; hold on;
 histogram2(gca, maeTrain_gpr, maeCV_gpr, xedges, yedges, 'DisplayStyle', 'Tile', 'ShowEmptyBins', 'On', 'EdgeColor', 'none');
 colormap(gca, [0.8,0.8,0.8; brewermap('Blues', 255)]);
 % plot(maeTrain_baseline, maeCV_baseline, 'dk', 'LineWidth', 2)
-xline(maeTrain_baseline, '-k', 'LineWidth', 1); yline(maeCV_baseline, '-k', 'LineWidth', 1)
+xline(maeTrain_baseline, '--k', 'LineWidth', 1); yline(maeCV_baseline, '--k', 'LineWidth', 1)
 ylim([0 0.2]); xlim([0 0.075]);
 xlabel('MAE_{Train}'); ylabel('MAE_{CV}');
 nexttile; box on; grid on; hold on;
+set(gca, 'FontName', 'Arial')
 histogram2(gca, maeTrain_rf, maeCV_rf, xedges, yedges, 'DisplayStyle', 'Tile', 'ShowEmptyBins', 'On', 'EdgeColor', 'none');
 colormap(gca, [0.8,0.8,0.8; brewermap('Greens', 255)]);
 % plot(maeTrain_baseline, maeCV_baseline, 'dk', 'LineWidth', 2)
-xline(maeTrain_baseline, '-k', 'LineWidth', 1); yline(maeCV_baseline, '-k', 'LineWidth', 1)
+xline(maeTrain_baseline, '--k', 'LineWidth', 1); yline(maeCV_baseline, '--k', 'LineWidth', 1)
 ylim([0 0.2]); xlim([0 0.075]);
 xlabel('MAE_{Train}'); ylabel('MAE_{CV}');
+set(gca, 'FontName', 'Arial')
 
 set(gcf, 'Units', 'inches', 'Position', [3,1,6.5,3.5])
 
@@ -275,34 +322,40 @@ annotation(gcf,'textbox',...
     [0.0854017094017094 0.850198412698413 0.0321196581196581 0.0773809523809526],...
     'String',{'a'},...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 annotation(gcf,'textbox',...
     [0.384547008547008 0.850198412698413 0.0321196581196578 0.0773809523809526],...
     'String','b',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 annotation(gcf,'textbox',...
     [0.683692307692307 0.850198412698413 0.0321196581196581 0.0773809523809526],...
     'String','c',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 annotation(gcf,'textbox',...
     [0.0875384615384615 0.374007936507936 0.0321196581196582 0.0773809523809524],...
     'String','d',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 annotation(gcf,'textbox',...
     [0.38668376068376 0.374007936507936 0.0321196581196577 0.0773809523809524],...
     'String','e',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 annotation(gcf,'textbox',...
     [0.685829059829059 0.374007936507936 0.0321196581196581 0.0773809523809524],...
     'String','f',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 
-exportgraphics(gcf, 'figures/mae_histogram2_allmodels.tif', 'Resolution', 600);
+% exportgraphics(gcf, 'figures/mae_histogram2_allmodels.tif', 'Resolution', 600);
 exportgraphics(gcf, 'figures/mae_histogram2_allmodels.eps', 'Resolution', 600);
 
 
@@ -312,7 +365,7 @@ Report detailed results of the best models found during the model
 optimization process (pipeline search and hyperparameter optimization).
 %}
 % clean up
-clear; clc; close all;
+clearvars -except colortriplet; clc; close all;
 % freq vector
 load('data\Data_Denso2021.mat', 'Data')
 freq = Data.Freq(1,:); clearvars Data
@@ -368,54 +421,99 @@ beta_zmag  = beta((69*2 + 1):(69*3));
 beta_zphz  = beta((69*3 + 1):end);
 % Plot
 figure; t = tiledlayout('flow', 'Padding', 'compact', 'TileSpacing', 'compact');
-ax1 = nexttile; hold on; box on; grid on; colororder({'k','b'});
+ax1 = nexttile; hold on; box on; grid on; colororder([[0,0,0];colortriplet(2,:)]);
 title('Z_{Real}', 'FontWeight', 'normal');
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
 plot(freq, beta_zreal, '-k', 'LineWidth', 1.5);
+xline(freq(5),'--', 'Color', colortriplet(1,:), 'LineWidth', 1.5)
 set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
 xlabel('Frequency (Hz)', 'FontSize', 10); ylabel('\beta\cdot10^2' , 'FontSize', 10);
 yyaxis right; 
-plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZreal}), '-b', 'LineWidth', 1);
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZreal}), '-', 'Color', colortriplet(2,:), 'LineWidth', 1.5);
 ylim([-1 1]);
-ax2 = nexttile; hold on; box on; grid on;  colororder({'k','b'});
+set(gca, 'FontName', 'Arial')
+ax2 = nexttile; hold on; box on; grid on; colororder([[0,0,0];colortriplet(2,:)]);
 title('Z_{Imaginary}', 'FontWeight', 'normal');
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
 plot(freq, beta_zimag, '-k', 'LineWidth', 1.5);
 set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
 xlabel('Frequency (Hz)', 'FontSize', 10);
 yyaxis right; 
-plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZimag}), '-b', 'LineWidth', 1);
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZimag}), '-', 'Color', colortriplet(2,:), 'LineWidth', 1.5);
 ylim([-1 1]);
-ax3 = nexttile; hold on; box on; grid on;  colororder({'k','b'});
+set(gca, 'FontName', 'Arial')
+ax3 = nexttile; hold on; box on; grid on; colororder([[0,0,0];colortriplet(2,:)]);
 title('|Z|', 'FontWeight', 'normal');
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
 plot(freq, beta_zmag, '-k', 'LineWidth', 1.5);
 set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
 xlabel('Frequency (Hz)', 'FontSize', 10);
 yyaxis right; 
-plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZmag}), '-b', 'LineWidth', 1);
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZmag}), '-', 'Color', colortriplet(2,:), 'LineWidth', 1.5);
 ylim([-1 1]);
-ax4 = nexttile; hold on; box on; grid on;  colororder({'k','b'});
+set(gca, 'FontName', 'Arial')
+ax4 = nexttile; hold on; box on; grid on; colororder([[0,0,0];colortriplet(2,:)]);
 title('\angleZ', 'FontWeight', 'normal');
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
 plot(freq, beta_zphz, '-k', 'LineWidth', 1.5);
+xline(freq(222-69*3),'--', 'Color', colortriplet(1,:), 'LineWidth', 1.5)
 set(gca, 'XScale', 'log'); ylim([-1.5, 1.5]); yticks(-1.5:0.5:1.5)
 xlabel('Frequency (Hz)', 'FontSize', 10);
 yyaxis right; 
-plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZphz}), '-b', 'LineWidth', 1);
+plot(freq, corr(data.Ycv{:,:}, data.Xcv{:,idxZphz}), '-', 'Color', colortriplet(2,:), 'LineWidth', 1.5);
 ylim([-1 1]);
+set(gca, 'FontName', 'Arial')
 ylabel({'Correlation to rel.','discharge capacity'})
 
 set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,1.9])
 
-exportgraphics(gcf, 'figures/model_linear_best_beta.tif', 'Resolution', 600)
-exportgraphics(gcf, 'figures/model_linear_best_beta.eps', 'Resolution', 600)
+annotation(gcf,'textbox',...
+    [0.0779230769230769 0.724285714285714 0.0374615384615385 0.131868131868132],...
+    'String',{'a'},...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+annotation(gcf,'textbox',...
+    [0.305487179487179 0.724285714285714 0.0374615384615384 0.131868131868132],...
+    'String','b',...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+annotation(gcf,'textbox',...
+    [0.534653846153846 0.724285714285714 0.0374615384615384 0.131868131868132],...
+    'String','c',...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+annotation(gcf,'textbox',...
+    [0.75901282051282 0.724285714285714 0.0374615384615384 0.131868131868132],...
+    'String','d',...
+    'FontName','Arial',...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
 
+exportgraphics(gcf, 'figures/model_linear_best_beta.eps', 'Resolution', 600)
+%%
 % Plot 2D partial dependence of the most important magnitude and most
 % important phase feature
 % % % [a, idx] = sort(abs(beta), 'descend'); % [5, 220]
-plot_2D_PDP(Model_Linear, PredTrain_Linear, [5,220], "Linear_1A_HypOpt")
+plot_2D_PDP(Model_Linear, PredTrain_Linear, [5,220])
+fname = "Linear_1A_HypOpt";
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.047474358974358,0.845119047619047,0.071115384615385,0.131868131868133],...
+    'String','e',...
+    'FontName','Arial',...
+    'FontSize', 12,...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+xlabel('Norm. Z_{Real} 1.3e+04 Hz')
+ylabel('Norm. \angleZ 2e+03 Hz')
 
+savefig(gcf, "figures/" + fname + "_2D_PDP")
+exportgraphics(gcf, "figures/" + fname + "_2D_PDP.eps", 'Resolution', 600);
+
+%%
 % GPR_1C (best) model
 seq = {...
     @RegressionPipeline.normalizeZScore,...
@@ -428,11 +526,26 @@ Model_GPR = RegressionPipeline(@fitrgp,...
 [Model_GPR, PredTrain_GPR, ~, PredCV_GPR] = crossvalidate(Model_GPR, data.Xcv, data.Ycv, cvsplit, seriesIdxCV);
 PredTest_GPR = predict(Model_GPR, data.Xtest, data.Ytest, seriesIdxTest);
 
-% Plot predictions
-plot_parity_all(PredTrain_GPR, PredCV_GPR, PredTest_GPR, "GPR_1E")
+% % % Plot predictions
+% % plot_parity_all(PredTrain_GPR, PredCV_GPR, PredTest_GPR, "GPR_1E")
 plot_1D_PDP(Model_GPR, "GPR_1E")
-plot_2D_PDP(Model_GPR, PredTrain_GPR, [2,7], "GPR_1E")
+%%
+plot_2D_PDP(Model_GPR, PredTrain_GPR, [2,7])
+fname = "GPR_1E";
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.035,0.845119047619047,0.071115384615385,0.131868131868133],...
+    'String','f',...
+    'FontName','Arial',...
+    'FontSize', 12,...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+xlabel('Norm. Z_{Real} 25 Hz')
+ylabel('Norm. \angleZ 79 Hz')
 
+savefig(gcf, "figures/" + fname + "_2D_PDP")
+exportgraphics(gcf, "figures/" + fname + "_2D_PDP.eps", 'Resolution', 600);
+%%
 % RF_1C (double freq) (best) (hyperparameter optimized) (weighted) model
 weights = evenlyWeightDataSeries(seriesIdxCV);
 seq = {...
@@ -455,10 +568,26 @@ Model_RF = RegressionPipeline(@fitrensemble,...
 [Model_RF, PredTrain_RF, ~, PredCV_RF] = crossvalidate(Model_RF, data.Xcv, data.Ycv, cvsplit, seriesIdxCV);
 PredTest_RF = predict(Model_RF, data.Xtest, data.Ytest, seriesIdxTest);
 % Plot predictions
-plot_parity_all(PredTrain_RF, PredCV_RF, PredTest_RF, "RF_1C_HypOpt_Weighted")
+% % % plot_parity_all(PredTrain_RF, PredCV_RF, PredTest_RF, "RF_1C_HypOpt_Weighted")
 plot_1D_PDP(Model_RF, "RF_1C_HypOpt_Weighted")
-plot_2D_PDP(Model_RF, PredTrain_RF, [2,5], "RF_1C_HypOpt_Weighted")
+%%
+plot_2D_PDP(Model_RF, PredTrain_RF, [2,5])
+fname = "RF_1C_HypOpt_Weighted";
+set(gca, 'FontName', 'Arial')
+annotation(gcf,'textbox',...
+    [0.035,0.845119047619047,0.071115384615385,0.131868131868133],...
+    'String','g',...
+    'FontName','Arial',...
+    'FontSize', 12,...
+    'FitBoxToText','off',...
+    'EdgeColor','none');
+xlabel('Norm. Z_{Real} 2 Hz')
+ylabel('Norm. |Z| 5e+02 Hz')
 
+savefig(gcf, "figures/" + fname + "_2D_PDP")
+exportgraphics(gcf, "figures/" + fname + "_2D_PDP.eps", 'Resolution', 600);
+
+%%
 save('results\top_3_models.mat');
 
 %% Plot distribution of predictions from top 3 models
@@ -628,16 +757,19 @@ ax1 = nexttile; hold on; box on; grid on;
 plotyy(PredTrain, 'k.', 'ax', ax1, 'SeriesColors', colorsTrain, 'MarkerSize', 8)
 xlabel('Actual rel. capacity'); 
 ylabel("Predicted rel. capacity");
+set(gca, 'FontName', 'Arial')
 % axis square; axis equal
 ax2 = nexttile; hold on; box on; grid on;
 plotyy(PredCV, 'k.', 'ax', ax2, 'SeriesColors', colorsTrain, 'MarkerSize', 8)
 xlabel('Actual rel. discharge capacity'); 
 ylabel("Predicted rel. capacity");
+set(gca, 'FontName', 'Arial')
 % axis square; axis equal
 ax3 = nexttile; hold on; box on; grid on;
 plotyy(PredTest, 'k.', 'ax', ax3, 'SeriesColors', colorsTest, 'MarkerSize', 8)
 xlabel('Actual rel. discharge capacity'); 
 ylabel("Predicted rel. capacity");
+set(gca, 'FontName', 'Arial')
 % axis square; axis equal
 linkaxes([ax1, ax2, ax3])
 set(gcf, 'Units', 'inches', 'Position', [2,2,6.5,2])
@@ -645,17 +777,20 @@ annotation(gcf,'textbox',...
     [0.079525641025641 0.807291666666667 0.045474358974359 0.125],...
     'String',{'a'},...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 annotation(gcf,'textbox',...
     [0.400038461538461 0.807291666666667 0.0454743589743589 0.125],'String','b',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 annotation(gcf,'textbox',...
     [0.715743589743589 0.807291666666667 0.0454743589743589 0.125],'String','c',...
     'FitBoxToText','off',...
-    'EdgeColor','none');
+    'EdgeColor','none',...
+    'FontName','Arial');
 
-exportgraphics(gcf, "figures/" + fname + "_parity.tif", 'Resolution', 600);
+% exportgraphics(gcf, "figures/" + fname + "_parity.tif", 'Resolution', 600);
 exportgraphics(gcf, "figures/" + fname + "_parity.eps", 'Resolution', 600);
 end
 
@@ -673,12 +808,12 @@ for i = 1:nFeatures
 end
 linkaxes(ax, 'y')
 set(gcf, 'Units', 'inches', 'Position', [1,1,8,6]);
-
-exportgraphics(gcf, "figures/" + fname + "_1D_PDP.tif", 'Resolution', 600);
-exportgraphics(gcf, "figures/" + fname + "_1D_PDP.eps", 'Resolution', 600);
+% 
+% exportgraphics(gcf, "figures/" + fname + "_1D_PDP.tif", 'Resolution', 600);
+% exportgraphics(gcf, "figures/" + fname + "_1D_PDP.eps", 'Resolution', 600);
 end
 
-function plot_2D_PDP(Model, PTrain, idxFeatures, fname)
+function plot_2D_PDP(Model, PTrain, idxFeatures)
 %rf
 features = Model.FeatureVars;
 M = Model.Model;
@@ -698,10 +833,6 @@ xlabel(strrep(features(idxFeatures(1)),'_',' '));
 ylabel(strrep(features(idxFeatures(2)),'_',' '));
 axis square;
 set(gcf, 'Units', 'inches', 'Position', [2,2,3.25,2.5]);
-
-savefig(gcf, "figures/" + fname + "_2D_PDP")
-exportgraphics(gcf, "figures/" + fname + "_2D_PDP.tif", 'Resolution', 600);
-exportgraphics(gcf, "figures/" + fname + "_2D_PDP.eps", 'Resolution', 600);
 end
 
 function plot_pred_pdfs(Data, PredsTest, splitVar, splitTitles, modelNames, colors, fname)
@@ -808,8 +939,9 @@ figure; heatmap(xlabels, ylabels(1), maeTrain,...
     'CellLabelFormat', '%0.2g',...
     'ColorbarVisible', 'off',...
     'ColorLimits', [maeTrainSort(2), maeTrainSort(end-1)])
-set(gcf, 'Units', 'inches', 'Position', [3.5,5,7,1])
-exportgraphics(gcf, "figures/heatmap_train_" + type + ".tif", 'Resolution', 600)
+set(gcf, 'Units', 'inches', 'Position', [3.5,5,7.2,1])
+set(gca, 'FontName', 'Arial')
+% exportgraphics(gcf, "figures/heatmap_train_" + type + ".tif", 'Resolution', 600)
 exportgraphics(gcf, "figures/heatmap_train_" + type + ".eps", 'Resolution', 600)
 
 figure; heatmap(xlabels, ylabels(2), maeCrossVal,...
@@ -817,8 +949,9 @@ figure; heatmap(xlabels, ylabels(2), maeCrossVal,...
     'CellLabelFormat', '%0.2g',...
     'ColorbarVisible', 'off',...
     'ColorLimits', [maeCVSort(2), maeCVSort(end-1)])
-set(gcf, 'Units', 'inches', 'Position', [3.5,5,7,1])
-exportgraphics(gcf, "figures/heatmap_cv_" + type + ".tif", 'Resolution', 600)
+set(gcf, 'Units', 'inches', 'Position', [3.5,5,7.2,1])
+set(gca, 'FontName', 'Arial')
+% exportgraphics(gcf, "figures/heatmap_cv_" + type + ".tif", 'Resolution', 600)
 exportgraphics(gcf, "figures/heatmap_cv_" + type + ".eps", 'Resolution', 600)
 
 figure; heatmap(xlabels, ylabels(3), maeTest,...
@@ -826,8 +959,9 @@ figure; heatmap(xlabels, ylabels(3), maeTest,...
     'CellLabelFormat', '%0.2g',...
     'ColorbarVisible', 'off',...
     'ColorLimits', [maeTestSort(2), maeTestSort(end-1)])
-set(gcf, 'Units', 'inches', 'Position', [3.5,5,7,1])
-exportgraphics(gcf, "figures/heatmap_test_" + type + ".tif", 'Resolution', 600)
+set(gcf, 'Units', 'inches', 'Position', [3.5,5,7.2,1])
+set(gca, 'FontName', 'Arial')
+% exportgraphics(gcf, "figures/heatmap_test_" + type + ".tif", 'Resolution', 600)
 exportgraphics(gcf, "figures/heatmap_test_" + type + ".eps", 'Resolution', 600)
 
 end
@@ -878,7 +1012,7 @@ plot(freq, corr(Y{:,:}, X{:,idxZreal}), '-k', 'LineWidth', 1);
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
 xlabel(t,'Frequency (Hz)', 'FontSize', 10);
 ylabel(["Correlation with";"rel. discharge capacity"], 'FontSize', 10);
-title("Z_{Real} (\Omega)"); 
+title("Z_{Real} (\Omega)", 'FontWeight', 'normal'); 
 ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); xlim([min(freq),max(freq)]);
 %features
@@ -898,13 +1032,14 @@ if any(idxSissoVar == 1)
         xline(freq(idx(i)), '-', 'Color', c(4,:), 'LineWidth', lw);
     end
 end
-
+set(gca, 'FontName', 'Arial')
 
 % Zimag
 nexttile; hold on; box on; grid on;
 plot(freq, corr(Y{:,:}, X{:,idxZimag}), '-k', 'LineWidth', 1)
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
-title("Z_{Imaginary} (\Omega)"); ylim([-1 1]); set(gca, 'XScale', 'log')
+title("Z_{Imaginary} (\Omega)", 'FontWeight', 'normal');
+ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); yticklabels([]); xlim([min(freq),max(freq)]);
 xline(freq(idxSingle), '-', 'Color', c(1,:), 'LineWidth', lw);
 for i = 1:length(idxDouble)
@@ -922,12 +1057,14 @@ if any(idxSissoVar == 2)
         xline(freq(idx(i)), '-', 'Color', c(4,:), 'LineWidth', lw);
     end
 end
+set(gca, 'FontName', 'Arial')
 
 % Zmag
 nexttile; hold on; box on; grid on;
 plot(freq, corr(Y{:,:}, X{:,idxZmag}), '-k', 'LineWidth', 1)
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
-title("|Z| (\Omega)"); ylim([-1 1]); set(gca, 'XScale', 'log')
+title("|Z| (\Omega)", 'FontWeight', 'normal');
+ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); yticklabels([]); xlim([min(freq),max(freq)]);
 xline(freq(idxSingle), '-', 'Color', c(1,:), 'LineWidth', lw);
 for i = 1:length(idxDouble)
@@ -945,12 +1082,14 @@ if any(idxSissoVar == 3)
         xline(freq(idx(i)), '-', 'Color', c(4,:), 'LineWidth', lw);
     end
 end
+set(gca, 'FontName', 'Arial')
 
 % Zphz
 nexttile; hold on; box on; grid on;
 plot(freq, corr(Y{:,:}, X{:,idxZphz}), '-k', 'LineWidth', 1)
 yline(0, '-', 'Color', [0 0 0], 'LineWidth', 0.5);
-title("\angleZ (\circ)"); ylim([-1 1]); set(gca, 'XScale', 'log')
+title("\angleZ (\circ)", 'FontWeight', 'normal');
+ylim([-1 1]); set(gca, 'XScale', 'log')
 xticklabels([]); yticklabels([]); xlim([min(freq),max(freq)]);
 xline(freq(idxSingle), '-', 'Color', c(1,:), 'LineWidth', lw);
 for i = 1:length(idxDouble)
@@ -968,6 +1107,7 @@ if any(idxSissoVar == 4)
         xline(freq(idx(i)), '-', 'Color', c(4,:), 'LineWidth', lw);
     end
 end
+set(gca, 'FontName', 'Arial')
 
 % features
 y = categorical(["Single freq.","Double freq.","Corr. search", "SISSO"], 'Ordinal', true);
@@ -1003,6 +1143,7 @@ end
 xticks([0.01 0.1 1 10 100 1000 10000]);
 xticklabels({'10^{-2}', '', '10^0', '', '10^2', '', '10^4'});
 set(gca, 'XMinorGrid', 'off')
+set(gca, 'FontName', 'Arial')
 
 %zimag
 nexttile; hold on; box on; grid on;
@@ -1037,6 +1178,7 @@ end
 xticks([0.01 0.1 1 10 100 1000 10000]);
 xticklabels({'10^{-2}', '', '10^0', '', '10^2', '', '10^4'});
 set(gca, 'XMinorGrid', 'off')
+set(gca, 'FontName', 'Arial')
 
 %zmag
 nexttile; hold on; box on; grid on;
@@ -1071,6 +1213,7 @@ end
 xticks([0.01 0.1 1 10 100 1000 10000]);
 xticklabels({'10^{-2}', '', '10^0', '', '10^2', '', '10^4'});
 set(gca, 'XMinorGrid', 'off')
+set(gca, 'FontName', 'Arial')
 
 %zphz
 nexttile; hold on; box on; grid on;
@@ -1105,10 +1248,11 @@ end
 xticks([0.01 0.1 1 10 100 1000 10000]);
 xticklabels({'10^{-2}', '', '10^0', '', '10^2', '', '10^4'});
 set(gca, 'XMinorGrid', 'off')
+set(gca, 'FontName', 'Arial')
 
 set(gcf, 'Units', 'inches', 'Position', [3,1,6.5,4])
 
-exportgraphics(gcf, "figures/selected_features_plot_" + type + ".tif", 'Resolution', 600)
+% exportgraphics(gcf, "figures/selected_features_plot_" + type + ".tif", 'Resolution', 600)
 exportgraphics(gcf, "figures/selected_features_plot_" + type + ".eps", 'Resolution', 600)
 end
 

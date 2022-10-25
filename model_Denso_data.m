@@ -71,6 +71,10 @@ seriesIdxCV = seriesIdx(~maskTest);
 % Define a cross-validation scheme.
 cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
 
+% Write tables to file for neural network training
+writetable([data.Ycv, data.Xcv], 'python\train.csv')
+writetable([data.Ytest, data.Xtest], 'python\test.csv')
+
 %% Train pipelines
 % Linear estimator pipelines
 Pipes_Linear = defineModelPipelines(@fitlm);
