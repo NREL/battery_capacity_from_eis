@@ -22,7 +22,7 @@ Modeling is performed in MATLAB, with some data processing conducted using Pytho
 - example_Denso_models.m: Replicates some of the more interesting models detailed in the paper and visualizes results. This is the most useful file for rapidly investigating the data and understanding/replicating this work.
 - explore_Denso_data.m: Explores the data, creating many of the data exploration plots reported in the paper.
 - model_Denso_data.m: Trains, cross-validates, and tests many thousands of possible models (takes many hours). Result files may be several GB.
-- data: Data files from both this work and prior work by [Zhang et al (2020)](https://www.nature.com/articles/s41467-020-15235-7.pdf), and MATLAB scripts for processing the data files into a machine-learning ready format.
+- data: Data files from both this work and prior work by [Zhang et al (2020)](https://www.nature.com/articles/s41467-020-15235-7.pdf), and MATLAB scripts for processing the data files into a machine-learning ready format. A csv of just the data used for modeling is save at 'data/data.csv' (some capacity and DCIR measurements not used for modeling are used for data exploration). Other data files are stored as '.mat' format.
 - functions: Library of MATLAB functions used in this work.
 - python: Jupyter notebooks running python code to train a neural network model and to fit equivalent circuit models to the EIS data used in this work.
 
