@@ -6,10 +6,16 @@ Replicates some of the more interesting models explored in the work.
 clear; close all; clc;
 addpath(genpath('functions'))
 
+% Load the frequency vector for plotting results
+load('data\Data_Denso2021.mat', 'Data')
+freq = Data.Freq(1,:); clearvars Data
+
 % Load the data tables
 load('data\Data_Denso2021.mat', 'DataFormatted', 'Data2Formatted')
 Data = combineDataTables(DataFormatted, Data2Formatted);
-freq = Data.Freq(1,:);
+% Remove series 43 and 44 (cells measured at BOL and not aged)
+Data(Data.seriesIdx == 43, :) = [];
+Data(Data.seriesIdx == 44, :) = [];
 
 % Some colors for plots
 colors1 = brewermap('RdPu', 22);
@@ -31,17 +37,14 @@ clearvars -except Data freq colortriplet colorsTrain colorsTest
 % Pull out X and Y data tables. X variables are any Zreal, Zimag, Zmag, and
 % Zphz data points. Y variable is the relative discharge capacity, q.
 X = Data(:, 5:end); Y = Data(:,2); seriesIdx = Data{:, 1};
-X_ECM = DataECM(:, 5:end); Y_ECM = DataECM(:,2);
 % Data from cells running a WLTP drive cycle, and some from the aging study
 % are used as test data.
 cellsTest = [7,10,13,17,24,30,31];
 maskTest = any(Data.seriesIdx == cellsTest,2);
 data.Xtest = X(maskTest,:); data.Ytest = Y(maskTest,:); 
-dataECM.Xtest = X_ECM(maskTest,:); dataECM.Ytest = Y_ECM(maskTest,:);
 seriesIdxTest = seriesIdx(maskTest);
 % Cross-validation and training are conducted on the same data split.
 data.Xcv = X(~maskTest,:); data.Ycv = Y(~maskTest,:); 
-dataECM.Xcv = X_ECM(~maskTest,:); dataECM.Ycv = Y(~maskTest,:);
 seriesIdxCV = seriesIdx(~maskTest);
 % Define a cross-validation scheme.
 cvsplit = cvpartseries(seriesIdxCV, 'Leaveout');
@@ -88,38 +91,9 @@ xlabel('Frequency (Hz)');
 ylabel('MAE')
 set(gcf, 'Units', 'inches', 'Position', [3.5,5,3.25,2.5])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 %% GPR double frequency model trained on all EIS data
-% Use the optimal frequencies found by the exhaustive search.
+% Use two frequencies that result in a pretty good model, near 10^1 and
+% 10^2 Hz.
 
 % Grab X and Y data. Same train/cv/test splits as above.
 X = Data(:, 6:end); Y = Data(:,2); seriesIdx = Data{:, 1};
@@ -457,28 +431,6 @@ annotation(gcf,'textbox',...
     'EdgeColor','none');
 
 %% Helper methods
-function idxKeep = filterInterpData(Data)
-% If the value of Zmag at 100 Hz for the interpolated data is not within
-% the range of Zmag at 10 Hz for all of the raw data for that
-% temperature/cell, then get rid of that row.
-idxKeep = true(height(Data), 1);
-idxFreq = 36;
-mask_m10C = Data.TdegC_EIS == -10;
-mask_25C = Data.TdegC_EIS == 25;
-uniqueSeries = unique(Data.seriesIdx, 'stable');
-for thisSeries = uniqueSeries'
-    maskSeries = Data.seriesIdx == thisSeries;
-    % -10C
-    maskSeries_m10C = maskSeries & mask_m10C;
-    Zmag = Data.Zmag(maskSeries_m10C, idxFreq);
-    idxKeep(maskSeries_m10C) = Zmag >= min(Zmag(~Data.isInterpEIS(maskSeries_m10C))) & Zmag <= max(Zmag(~Data.isInterpEIS(maskSeries_m10C)));
-    % 25C
-    maskSeries_25C = maskSeries & mask_25C;
-    Zmag = Data.Zmag(maskSeries_25C, idxFreq);
-    idxKeep(maskSeries_25C) = Zmag >= min(Zmag(~Data.isInterpEIS(maskSeries_25C))) & Zmag <= max(Zmag(~Data.isInterpEIS(maskSeries_25C)));
-end
-end
-
 function Data = combineDataTables(DataFormatted, Data2Formatted)
 % Make seriesIdx consistent for cells that have repeat data in DataFormatted 
 % and Data2Formatted
