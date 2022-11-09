@@ -30,8 +30,7 @@ Paper figures and results can be replicated by running the associated MATLAB fil
 
 ## Requirements
 
-- MATLAB R2020b
-	-Statistics and Machine Learning Toolbox
+- MATLAB R2020b with Statistics and Machine Learning Toolbox
 - Python 3.7 (virtual environment defined in 'python/environment.yml')
 - IDE compatible with Jupyter notebooks
 
