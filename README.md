@@ -8,15 +8,17 @@ Paul Gasper<sup>1,*</sup>, Andrew Schiek<sup>1</sup>, Kandler Smith<sup>1</sup>,
 
 <sup>*</sup> Corresponding author: Paul.Gasper@nrel.gov, pauljgasper@gmail.com
 
-This repository provides the data and code used in the work "Predicting battery capacity from impedance at varying temperature and state-of-charge using machine-learning". This work uses machine-learning to develop models predicting battery capacity from impedance recorded at varying temperature and state-of-charge from 32 large-format NMC/Gr Li-ion batteries throughout the course of a 500-day aging study. The data set is comprised of a total of 727 electrochemical impedance spectroscopy (EIS) measurements, 622 DC internal resistance measurements, and 1216 capacity measurements. 
+This repository provides the data and code used in the work "Predicting battery capacity from impedance at varying temperature and state-of-charge using machine-learning". This work uses machine-learning to develop models predicting battery capacity from impedance recorded at varying temperature and state-of-charge from 32 large-format NMC/Gr Li-ion batteries throughout the course of a 500-day aging study. The data set is comprised of a total of 727 electrochemical impedance spectroscopy (EIS) measurements, 622 DC internal resistance measurements, and 1216 capacity measurements. Further information on the aging study and observed degradation trends is reported in [Smith et al, (2021) JES *168* 100530](https://iopscience.iop.org/article/10.1149/1945-7111/ac2ebd/pdf).
 
 ![](data_summary.jpg)
 
 Modeling is performed in MATLAB, with some data processing conducted using Python. A wide variety of feature engineering approaches with mutliple types of regression models are searched to find the optimal modeling approach, using a machine-learning pipeline approach in the style of the Python library sklearn, automating the investigation of thousands of potential models. Model performance is evaluated using both cross-validation within the training set (about 70% of the data) and testing on held-out data (about 30% of the data). An example result below uses impedance data from just two frequencies as inputs to a random forest model, trained using weights to help correct the model for imbalance of the data set, acheiving 2.6% mean absolute error on unseen data (left axes below). Models were interrogated with a variety of approaches, such as partial dependence (middle axes). The exhaustive search for the best model using any two frequencies helps inform rules for selecting frequencies that are sensitive to battery health but tolerant to the variation of temperature and SOC, suggesting that impedance near 10<sup>0</sup> Hz and 10<sup>3</sup> Hz is most effective for this data set; this approach could easily be replicated for other data sets to determine critical frequencies for other battery formats or chemistries. The best result achieves an error of 1.9% on test data using an ensemble of linear, GPR, and RF models.
 
-![](best_model.jpg).
+![](best_model.jpg)
 
-## Repository structure
+## Repository structure and MATLAB file order
+
+Paper figures and results can be replicated by running the associated MATLAB files in order. Python code for ECM modeling and ANN training are included in the python folder, but do not need to be run, as the outputs are saved and uploaded in the repository.
 
 - README.md: this document
 - example_Denso_models.m: Replicates some of the more interesting models detailed in the paper and visualizes results. This is the most useful file for rapidly investigating the data and understanding/replicating this work.
