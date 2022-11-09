@@ -39,4 +39,4 @@ A similar approach is demonstrated using Python with the sklearn library  on the
 
 ## Citation
 
-Gasper P, Schiek A, Smith K, Shimonishi Y, and Yoshida S. (2022). _Submitted for publication._
+Gasper P, Schiek A, Smith K, Shimonishi Y, and Yoshida S. (2022). _In press._
