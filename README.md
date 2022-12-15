@@ -39,4 +39,5 @@ A similar approach is demonstrated using Python with the sklearn library  on the
 
 ## Citation
 
-Gasper P, Schiek A, Smith K, Shimonishi Y, and Yoshida S. (2022). _In press._
+Gasper P, Schiek A, Smith K, Shimonishi Y, and Yoshida S. (2022) Cell Reports Physical Science 3, 101184. DOI: 10.1016/j.xcrp.2022.101184.
+[Article link](https://www.cell.com/cell-reports-physical-science/fulltext/S2666-3864(22)00502-1)
