@@ -1,0 +1,4 @@
+Mona Faraji-Niri, Muhammad Rashid, Jonathan Sansom, Muhammad Sheikh, Dhammika Widanage, James Marco
+Accelerated state of health estimation of second life lithium-ion batteries via electrochemical impedance spectroscopy tests and machine learning techniques
+Journal of Energy Storage 58 (2023) 106295
+https://doi.org/10.1016/j.est.2022.106295
